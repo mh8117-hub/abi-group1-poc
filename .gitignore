@@ -1,0 +1,8 @@
+# secrets
+.env
+# full course datasets are not committed (course-provided; held-out must stay unseen)
+data/*_8000.csv
+data/*_1500.csv
+data/*Heldout*
+__pycache__/
+*.pyc

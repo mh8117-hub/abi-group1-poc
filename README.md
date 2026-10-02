@@ -16,6 +16,7 @@ credit-card billing disputes → structured case record + routing recommendation
 | `src/parser.py` | Structured-output parser/validator. Labels every output `ok` / `repaired` / `invalid` / `failed` and records each repair. |
 | `src/run_baseline.py` | Runs cases, saves raw + parsed outputs, latency, reference comparison, run metadata (git commit, model, settings). Refuses held-out data (team plan P7). |
 | `src/select_sample.py` | Reproducible 12-case development sample (seed 4), stratified by the P3 subgroup. |
+| `src/login.py` | Signs in with your own Open WebUI account (password via getpass, never stored) and writes the session token to the git-ignored `.env`. Needed because API keys are not available to student accounts. |
 | `tests/test_parser.py` | 11 offline parser tests (no network). |
 | `data/dev_sample_cases.csv` | The 12 development cases used (Development set only). |
 | `runs/` | Execution evidence from DGX runs. |
@@ -24,7 +25,7 @@ credit-card billing disputes → structured case record + routing recommendation
 ```bash
 git clone <repo-url> && cd abi-complaint-poc
 git checkout mingyu/a4-baseline-client
-cp .env.example .env            # add your OPENWEBUI_TOKEN
+python -m src.login             # writes your session token to .env (or copy .env.example and paste an API key)
 python -m unittest discover -s tests -v          # offline parser tests
 python -m src.run_baseline --list-models          # confirms endpoint + model id
 python -m src.run_baseline --cases data/dev_sample_cases.csv

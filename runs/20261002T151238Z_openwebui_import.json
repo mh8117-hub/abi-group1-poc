@@ -1,0 +1,1118 @@
+[
+ {
+  "id": "3fb72b1b-12b6-48b0-86f2-b4a671ed1d67",
+  "title": "A4 API run 20261002T151238Z | case 1487055 (A) (imported API log, commit c765bea)",
+  "chat": {
+   "id": "3fb72b1b-12b6-48b0-86f2-b4a671ed1d67",
+   "title": "A4 API run 20261002T151238Z | case 1487055 (A) (imported API log, commit c765bea)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": 0.0,
+    "seed": 42,
+    "max_tokens": 600
+   },
+   "history": {
+    "messages": {
+     "b797d5b5-7f0b-424c-8259-9aa43644d4fc": {
+      "id": "b797d5b5-7f0b-424c-8259-9aa43644d4fc",
+      "parentId": null,
+      "childrenIds": [
+       "926dc365-a2e6-4b8e-b4aa-fcaa96c22b2c"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nOrder # XXXX was supposedly delivered on or around XXXX XXXX, tracking info shows it was signed by someone who forged my signature, a copy is enclosed. XXXX XXXX was a Monday, I was not at home on this day and the signature is forged as it is not mine, not even fully signed. The signature is not my full name, you can see from the copy provided my USPS. An A-Z claim was filed with Amazon, however, it was closed a day after opening stating the item was signed for by myself and would not investigate further. A dispute was made with Amazon credit as well, however, it might have been closed as well and the reason for this complaint. The total charge for the order is XXXX, please advise Synchrony Bank I need this item disputed and or refunded, if possible.\n\"\"\"",
+      "timestamp": 1790953958,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "926dc365-a2e6-4b8e-b4aa-fcaa96c22b2c": {
+      "id": "926dc365-a2e6-4b8e-b4aa-fcaa96c22b2c",
+      "parentId": "b797d5b5-7f0b-424c-8259-9aa43644d4fc",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer disputes Order #XXXX, claims forged signature on delivery, and has filed an A-Z claim with Amazon which was closed without investigation.\",\n  \"stated_facts\": [\n    \"Order #XXXX was supposedly delivered on or around XXXX XXXX\",\n    \"Tracking info shows a forged signature\",\n    \"Signature is not the customer's full name\",\n    \"Customer was not at home on the delivery day\",\n    \"A-Z claim was filed with Amazon\",\n    \"Amazon claim was closed without investigation\",\n    \"Dispute was made with Amazon credit\",\n    \"Total charge for the order is XXXX\"\n  ],\n  \"unknowns\": [\n    \"Actual delivery date\",\n    \"Customer's full name\",\n    \"Copy of USPS signature provided\",\n    \"Status of Amazon credit dispute\"\n  ],\n  \"fraud_or_security_concern\": true,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Forced signature and closed Amazon investigation raise concerns, require human review to assess validity and potential fraud.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1790953973,
+      "done": true,
+      "usage": {
+       "completion_tokens": 228,
+       "prompt_tokens": 399,
+       "total_tokens": 627
+      }
+     }
+    },
+    "currentId": "926dc365-a2e6-4b8e-b4aa-fcaa96c22b2c"
+   },
+   "messages": [
+    {
+     "id": "b797d5b5-7f0b-424c-8259-9aa43644d4fc",
+     "parentId": null,
+     "childrenIds": [
+      "926dc365-a2e6-4b8e-b4aa-fcaa96c22b2c"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nOrder # XXXX was supposedly delivered on or around XXXX XXXX, tracking info shows it was signed by someone who forged my signature, a copy is enclosed. XXXX XXXX was a Monday, I was not at home on this day and the signature is forged as it is not mine, not even fully signed. The signature is not my full name, you can see from the copy provided my USPS. An A-Z claim was filed with Amazon, however, it was closed a day after opening stating the item was signed for by myself and would not investigate further. A dispute was made with Amazon credit as well, however, it might have been closed as well and the reason for this complaint. The total charge for the order is XXXX, please advise Synchrony Bank I need this item disputed and or refunded, if possible.\n\"\"\"",
+     "timestamp": 1790953958,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "926dc365-a2e6-4b8e-b4aa-fcaa96c22b2c",
+     "parentId": "b797d5b5-7f0b-424c-8259-9aa43644d4fc",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer disputes Order #XXXX, claims forged signature on delivery, and has filed an A-Z claim with Amazon which was closed without investigation.\",\n  \"stated_facts\": [\n    \"Order #XXXX was supposedly delivered on or around XXXX XXXX\",\n    \"Tracking info shows a forged signature\",\n    \"Signature is not the customer's full name\",\n    \"Customer was not at home on the delivery day\",\n    \"A-Z claim was filed with Amazon\",\n    \"Amazon claim was closed without investigation\",\n    \"Dispute was made with Amazon credit\",\n    \"Total charge for the order is XXXX\"\n  ],\n  \"unknowns\": [\n    \"Actual delivery date\",\n    \"Customer's full name\",\n    \"Copy of USPS signature provided\",\n    \"Status of Amazon credit dispute\"\n  ],\n  \"fraud_or_security_concern\": true,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Forced signature and closed Amazon investigation raise concerns, require human review to assess validity and potential fraud.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1790953973,
+     "done": true,
+     "usage": {
+      "completion_tokens": 228,
+      "prompt_tokens": 399,
+      "total_tokens": 627
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1790953958000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1790953958,
+  "updated_at": 1790953973,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ },
+ {
+  "id": "61f305ea-8c3d-40b8-86c7-389367cf5991",
+  "title": "A4 API run 20261002T151238Z | case 1502800 (A) (imported API log, commit c765bea)",
+  "chat": {
+   "id": "61f305ea-8c3d-40b8-86c7-389367cf5991",
+   "title": "A4 API run 20261002T151238Z | case 1502800 (A) (imported API log, commit c765bea)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": 0.0,
+    "seed": 42,
+    "max_tokens": 600
+   },
+   "history": {
+    "messages": {
+     "48ca12e2-4351-4431-b301-190e652b6295": {
+      "id": "48ca12e2-4351-4431-b301-190e652b6295",
+      "parentId": null,
+      "childrenIds": [
+       "ee0d2c1a-0fe1-4f4d-9a59-ea8386845d67"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nTrying to make payments to Synchrony Bank through their automated system since they charge {$10.00} for agent payment help. However, I feel there is a scam in that you can not get through. You enter what they ask and it does not take. Over and over again. You are endlessly trying to make a payment then because it is not made I get a late fee or charges. You also get a message that wait time is extensive please call back later. Secondly, when they call they say they are Synchrony Bank but do not give any other information. When I call they ask why am I calling - DUH. I have multiple accounts with them which one is it? This occurs month after month!\n\"\"\"",
+      "timestamp": 1790953973,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "ee0d2c1a-0fe1-4f4d-9a59-ea8386845d67": {
+      "id": "ee0d2c1a-0fe1-4f4d-9a59-ea8386845d67",
+      "parentId": "48ca12e2-4351-4431-b301-190e652b6295",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer is experiencing difficulties making payments to Synchrony Bank through their automated system, resulting in late fees and charges.\",\n  \"stated_facts\": [\n    \"Customer is trying to make payments to Synchrony Bank\",\n    \"Automated system charges $10.00 for agent payment help\",\n    \"System does not accept payments after multiple attempts\",\n    \"Customer receives late fees and charges\",\n    \"Automated system messages show extensive wait times\",\n    \"Customer receives calls from Synchrony Bank but no additional information is provided\",\n    \"Customer has multiple accounts with Synchrony Bank\"\n  ],\n  \"unknowns\": [\n    \"Account numbers or specific account details\",\n    \"Exact dates of late fees and charges\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer's experience suggests a potential issue with Synchrony Bank's payment processing system, requiring human review to assess and resolve the issue.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1790953988,
+      "done": true,
+      "usage": {
+       "completion_tokens": 222,
+       "prompt_tokens": 376,
+       "total_tokens": 598
+      }
+     }
+    },
+    "currentId": "ee0d2c1a-0fe1-4f4d-9a59-ea8386845d67"
+   },
+   "messages": [
+    {
+     "id": "48ca12e2-4351-4431-b301-190e652b6295",
+     "parentId": null,
+     "childrenIds": [
+      "ee0d2c1a-0fe1-4f4d-9a59-ea8386845d67"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nTrying to make payments to Synchrony Bank through their automated system since they charge {$10.00} for agent payment help. However, I feel there is a scam in that you can not get through. You enter what they ask and it does not take. Over and over again. You are endlessly trying to make a payment then because it is not made I get a late fee or charges. You also get a message that wait time is extensive please call back later. Secondly, when they call they say they are Synchrony Bank but do not give any other information. When I call they ask why am I calling - DUH. I have multiple accounts with them which one is it? This occurs month after month!\n\"\"\"",
+     "timestamp": 1790953973,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "ee0d2c1a-0fe1-4f4d-9a59-ea8386845d67",
+     "parentId": "48ca12e2-4351-4431-b301-190e652b6295",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer is experiencing difficulties making payments to Synchrony Bank through their automated system, resulting in late fees and charges.\",\n  \"stated_facts\": [\n    \"Customer is trying to make payments to Synchrony Bank\",\n    \"Automated system charges $10.00 for agent payment help\",\n    \"System does not accept payments after multiple attempts\",\n    \"Customer receives late fees and charges\",\n    \"Automated system messages show extensive wait times\",\n    \"Customer receives calls from Synchrony Bank but no additional information is provided\",\n    \"Customer has multiple accounts with Synchrony Bank\"\n  ],\n  \"unknowns\": [\n    \"Account numbers or specific account details\",\n    \"Exact dates of late fees and charges\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer's experience suggests a potential issue with Synchrony Bank's payment processing system, requiring human review to assess and resolve the issue.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1790953988,
+     "done": true,
+     "usage": {
+      "completion_tokens": 222,
+      "prompt_tokens": 376,
+      "total_tokens": 598
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1790953973000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1790953973,
+  "updated_at": 1790953988,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ },
+ {
+  "id": "6b9c700b-68a2-4db4-819e-2e88cce978c7",
+  "title": "A4 API run 20261002T151238Z | case 1451462 (A) (imported API log, commit c765bea)",
+  "chat": {
+   "id": "6b9c700b-68a2-4db4-819e-2e88cce978c7",
+   "title": "A4 API run 20261002T151238Z | case 1451462 (A) (imported API log, commit c765bea)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": 0.0,
+    "seed": 42,
+    "max_tokens": 600
+   },
+   "history": {
+    "messages": {
+     "e2af459c-6160-431d-832c-ab660a891723": {
+      "id": "e2af459c-6160-431d-832c-ab660a891723",
+      "parentId": null,
+      "childrenIds": [
+       "67a2293c-0972-439c-b79c-324319bc67f4"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nXXXX I recieved a phone call from an XXXX speaking person claiming to be from XXXX telling me that they have been alerted that my computer was corrupted. They told me that the XXXX anti-virus software that came with my computer was not strong enough to correct the problem and they got me to purchase another software for {$250.00} which I put on my SunTrust credit card. They gave me an XXXX number to call if I had a problem. When I called that number it did not go to XXXX, it went to another company. I then called XXXX directly and told them what happened. They told me I had been scammed and that these people had no connection to XXXX and to take the software they installed off my computer before it got further corrupted. They said they would never call anyone saying their computer had been corruptedWhen I found out I had been scammed I called Suntrust and told them what happened and they took the charge off my card. 6 months later in XXXX they put the charge back on my card saying it was a good charge since I authorized it even though I had been scammed. I refused to pay the charge and they took it to a credit agency. My credit was reduced from XXXX to XXXX. I now have a hard time getting a credit card. I have contacted SunTrust with all kinds of documentation proving the scam but they refused to change their mind. The internet is full of very same story where this company has been calling XXXX 's of other people just like me claiming to be from XXXX and that their computer is corrupted. SunTrust does not stand by the people who bank with them. I would never do business with them again.\n\"\"\"",
+      "timestamp": 1790953988,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "67a2293c-0972-439c-b79c-324319bc67f4": {
+      "id": "67a2293c-0972-439c-b79c-324319bc67f4",
+      "parentId": "e2af459c-6160-431d-832c-ab660a891723",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer claims to have been scammed by a company claiming to be XXXX, resulting in a charge on their SunTrust credit card. SunTrust initially removed the charge but later reinstated it, damaging the customer's credit.\",\n  \"stated_facts\": [\n    \"Received a phone call from a person claiming to be from XXXX\",\n    \"Claimed computer was corrupted and needed anti-virus software\",\n    \"Purchased software for $250 on SunTrust credit card\",\n    \"Contacted XXXX directly and they confirmed it was a scam\",\n    \"SunTrust initially removed the charge but later reinstated it\",\n    \"Charge was taken to a credit agency, damaging the customer's credit\"\n  ],\n  \"unknowns\": [\n    \"XXXX company's name\",\n    \"XXXX number given to the customer\",\n    \"XXXX's response to the customer's documentation\"\n  ],\n  \"fraud_or_security_concern\": true,\n  \"recommended_routing\": \"Card Fraud & Security\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer was a victim of a known scam, and SunTrust's actions may be inconsistent with their usual policies.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1790954005,
+      "done": true,
+      "usage": {
+       "completion_tokens": 246,
+       "prompt_tokens": 579,
+       "total_tokens": 825
+      }
+     }
+    },
+    "currentId": "67a2293c-0972-439c-b79c-324319bc67f4"
+   },
+   "messages": [
+    {
+     "id": "e2af459c-6160-431d-832c-ab660a891723",
+     "parentId": null,
+     "childrenIds": [
+      "67a2293c-0972-439c-b79c-324319bc67f4"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nXXXX I recieved a phone call from an XXXX speaking person claiming to be from XXXX telling me that they have been alerted that my computer was corrupted. They told me that the XXXX anti-virus software that came with my computer was not strong enough to correct the problem and they got me to purchase another software for {$250.00} which I put on my SunTrust credit card. They gave me an XXXX number to call if I had a problem. When I called that number it did not go to XXXX, it went to another company. I then called XXXX directly and told them what happened. They told me I had been scammed and that these people had no connection to XXXX and to take the software they installed off my computer before it got further corrupted. They said they would never call anyone saying their computer had been corruptedWhen I found out I had been scammed I called Suntrust and told them what happened and they took the charge off my card. 6 months later in XXXX they put the charge back on my card saying it was a good charge since I authorized it even though I had been scammed. I refused to pay the charge and they took it to a credit agency. My credit was reduced from XXXX to XXXX. I now have a hard time getting a credit card. I have contacted SunTrust with all kinds of documentation proving the scam but they refused to change their mind. The internet is full of very same story where this company has been calling XXXX 's of other people just like me claiming to be from XXXX and that their computer is corrupted. SunTrust does not stand by the people who bank with them. I would never do business with them again.\n\"\"\"",
+     "timestamp": 1790953988,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "67a2293c-0972-439c-b79c-324319bc67f4",
+     "parentId": "e2af459c-6160-431d-832c-ab660a891723",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer claims to have been scammed by a company claiming to be XXXX, resulting in a charge on their SunTrust credit card. SunTrust initially removed the charge but later reinstated it, damaging the customer's credit.\",\n  \"stated_facts\": [\n    \"Received a phone call from a person claiming to be from XXXX\",\n    \"Claimed computer was corrupted and needed anti-virus software\",\n    \"Purchased software for $250 on SunTrust credit card\",\n    \"Contacted XXXX directly and they confirmed it was a scam\",\n    \"SunTrust initially removed the charge but later reinstated it\",\n    \"Charge was taken to a credit agency, damaging the customer's credit\"\n  ],\n  \"unknowns\": [\n    \"XXXX company's name\",\n    \"XXXX number given to the customer\",\n    \"XXXX's response to the customer's documentation\"\n  ],\n  \"fraud_or_security_concern\": true,\n  \"recommended_routing\": \"Card Fraud & Security\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer was a victim of a known scam, and SunTrust's actions may be inconsistent with their usual policies.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1790954005,
+     "done": true,
+     "usage": {
+      "completion_tokens": 246,
+      "prompt_tokens": 579,
+      "total_tokens": 825
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1790953988000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1790953988,
+  "updated_at": 1790954005,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ },
+ {
+  "id": "db8ed731-034f-400b-886b-1e88d3388b5d",
+  "title": "A4 API run 20261002T151238Z | case 2217258 (A) (imported API log, commit c765bea)",
+  "chat": {
+   "id": "db8ed731-034f-400b-886b-1e88d3388b5d",
+   "title": "A4 API run 20261002T151238Z | case 2217258 (A) (imported API log, commit c765bea)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": 0.0,
+    "seed": 42,
+    "max_tokens": 600
+   },
+   "history": {
+    "messages": {
+     "2498a4f7-933c-4801-92fa-77437e50ba62": {
+      "id": "2498a4f7-933c-4801-92fa-77437e50ba62",
+      "parentId": null,
+      "childrenIds": [
+       "2d61cefb-094f-4cf9-a5a2-e05298a4393d"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nWe were issued a Costco Citi card ( XX/XX/XXXX ) without our authorization when Costco ended its contract with XXXX. We did not want a Citi card and chose not to activate it until we needed to retrieve a credit from an earlier return. On XX/XX/XXXX we activated the card, and instead of finding a credit for {$30.00} we found one for XXXX! And had no idea what that was for or from. I called Citi to find out- was told it was just part of the transition from XXXX and the balance was correct. I called again the next day or so and this time pointed out in detail what my records showed- and that it was NOT a {$990.00} credit. Again I was led to believe it was all a legitimate transaction. We began using the card on XX/XX/XXXX for 1 charges, and not until XXXX for other charges. The figures continued to bug me and I call a 3rd time around XX/XX/XXXX or so, and asked the rep to walk me through that credit and where it was from. The response was pretty much the same : all part of the switch. We decided to spend down that credit then close the account. On XX/XX/XXXX we got a check from Citi for the balance of the credit. This struck me as odd, we did n't ask for it, or expect it. We deposited it in the bank and used it to pay the Citi bill that month. And on XX/XX/XXXX we get a notice from Citi saying the bank had made a mistake, the credit was an error and that we would be expected to pay it back- that charge would show up on the billing for XX/XX/XXXX. We called immediately and over several days have talked with 4 customer service reps - 2 of whom were supervisors. The regular reps can do nothing and really did n't understand the situation. When I explained the mis-leading and false info given to me during several phone call, and ask that the bank take responsibility for what were in fact 4 errors ( the initial deposit, the assurance of the correctness of the statements, the ignoring my insistence on the actual credit, and finally the sending of check for a credit as late as the end of XXXX ) and erase the charge from our current bill, I was told there was no way that could be done. The supervisor today denied that I had made any phone calls until XX/XX/XXXX when apparently I said the XXXX account was closed ... and said their records showed NO phone calls from me except the XXXX one and the one on XX/XX/XXXX. My records do show I called when I said I did, and there is no record that I called on XX/XX/XXXX to tell them something that was not true -the Costco XXXX card expired on XX/XX/2016. I feel as if we are being scape-goated, and that I was lied to about phone calls that possibly were deleted from their records. We are in our XXXX and on a fixed income- I ca n't help but wonder if we are n't the perfect demographic for a scam! We have closed the Citi account and returned the cut-up cards to them. Once the Citi cards were issued in XXXX our credit score- excellent for 55 years, dropped several points. We are most distressed with Citi bank.\n\"\"\"",
+      "timestamp": 1790954005,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "2d61cefb-094f-4cf9-a5a2-e05298a4393d": {
+      "id": "2d61cefb-094f-4cf9-a5a2-e05298a4393d",
+      "parentId": "2498a4f7-933c-4801-92fa-77437e50ba62",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer received a Costco Citi card without authorization, disputes incorrect credit on the card, and claims Citi provided misleading information and deleted phone call records.\",\n  \"stated_facts\": [\n    \"Card was issued without authorization\",\n    \"Incorrect credit on the card\",\n    \"Citi provided misleading information\",\n    \"Phone call records were deleted\",\n    \"Customer's credit score dropped after receiving the card\",\n    \"Customer closed the account and returned the cards\"\n  ],\n  \"unknowns\": [\n    \"Exact dates of phone calls and transactions\",\n    \"Amount of the initial credit and the correct amount\",\n    \"Reason for the credit and the transition from XXXX\",\n    \"Citi's internal investigation and review process\"\n  ],\n  \"fraud_or_security_concern\": true,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer disputes incorrect credit and claims Citi provided misleading information, which may indicate a billing dispute or potential scam.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1790954020,
+      "done": true,
+      "usage": {
+       "completion_tokens": 217,
+       "prompt_tokens": 937,
+       "total_tokens": 1154
+      }
+     }
+    },
+    "currentId": "2d61cefb-094f-4cf9-a5a2-e05298a4393d"
+   },
+   "messages": [
+    {
+     "id": "2498a4f7-933c-4801-92fa-77437e50ba62",
+     "parentId": null,
+     "childrenIds": [
+      "2d61cefb-094f-4cf9-a5a2-e05298a4393d"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nWe were issued a Costco Citi card ( XX/XX/XXXX ) without our authorization when Costco ended its contract with XXXX. We did not want a Citi card and chose not to activate it until we needed to retrieve a credit from an earlier return. On XX/XX/XXXX we activated the card, and instead of finding a credit for {$30.00} we found one for XXXX! And had no idea what that was for or from. I called Citi to find out- was told it was just part of the transition from XXXX and the balance was correct. I called again the next day or so and this time pointed out in detail what my records showed- and that it was NOT a {$990.00} credit. Again I was led to believe it was all a legitimate transaction. We began using the card on XX/XX/XXXX for 1 charges, and not until XXXX for other charges. The figures continued to bug me and I call a 3rd time around XX/XX/XXXX or so, and asked the rep to walk me through that credit and where it was from. The response was pretty much the same : all part of the switch. We decided to spend down that credit then close the account. On XX/XX/XXXX we got a check from Citi for the balance of the credit. This struck me as odd, we did n't ask for it, or expect it. We deposited it in the bank and used it to pay the Citi bill that month. And on XX/XX/XXXX we get a notice from Citi saying the bank had made a mistake, the credit was an error and that we would be expected to pay it back- that charge would show up on the billing for XX/XX/XXXX. We called immediately and over several days have talked with 4 customer service reps - 2 of whom were supervisors. The regular reps can do nothing and really did n't understand the situation. When I explained the mis-leading and false info given to me during several phone call, and ask that the bank take responsibility for what were in fact 4 errors ( the initial deposit, the assurance of the correctness of the statements, the ignoring my insistence on the actual credit, and finally the sending of check for a credit as late as the end of XXXX ) and erase the charge from our current bill, I was told there was no way that could be done. The supervisor today denied that I had made any phone calls until XX/XX/XXXX when apparently I said the XXXX account was closed ... and said their records showed NO phone calls from me except the XXXX one and the one on XX/XX/XXXX. My records do show I called when I said I did, and there is no record that I called on XX/XX/XXXX to tell them something that was not true -the Costco XXXX card expired on XX/XX/2016. I feel as if we are being scape-goated, and that I was lied to about phone calls that possibly were deleted from their records. We are in our XXXX and on a fixed income- I ca n't help but wonder if we are n't the perfect demographic for a scam! We have closed the Citi account and returned the cut-up cards to them. Once the Citi cards were issued in XXXX our credit score- excellent for 55 years, dropped several points. We are most distressed with Citi bank.\n\"\"\"",
+     "timestamp": 1790954005,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "2d61cefb-094f-4cf9-a5a2-e05298a4393d",
+     "parentId": "2498a4f7-933c-4801-92fa-77437e50ba62",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer received a Costco Citi card without authorization, disputes incorrect credit on the card, and claims Citi provided misleading information and deleted phone call records.\",\n  \"stated_facts\": [\n    \"Card was issued without authorization\",\n    \"Incorrect credit on the card\",\n    \"Citi provided misleading information\",\n    \"Phone call records were deleted\",\n    \"Customer's credit score dropped after receiving the card\",\n    \"Customer closed the account and returned the cards\"\n  ],\n  \"unknowns\": [\n    \"Exact dates of phone calls and transactions\",\n    \"Amount of the initial credit and the correct amount\",\n    \"Reason for the credit and the transition from XXXX\",\n    \"Citi's internal investigation and review process\"\n  ],\n  \"fraud_or_security_concern\": true,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer disputes incorrect credit and claims Citi provided misleading information, which may indicate a billing dispute or potential scam.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1790954020,
+     "done": true,
+     "usage": {
+      "completion_tokens": 217,
+      "prompt_tokens": 937,
+      "total_tokens": 1154
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1790954005000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1790954005,
+  "updated_at": 1790954020,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ },
+ {
+  "id": "ef671878-dd4b-453a-8c18-0fba4a8fd4fa",
+  "title": "A4 API run 20261002T151238Z | case 2074002 (B) (imported API log, commit c765bea)",
+  "chat": {
+   "id": "ef671878-dd4b-453a-8c18-0fba4a8fd4fa",
+   "title": "A4 API run 20261002T151238Z | case 2074002 (B) (imported API log, commit c765bea)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": 0.0,
+    "seed": 42,
+    "max_tokens": 600
+   },
+   "history": {
+    "messages": {
+     "e28e3be1-c542-455f-b6be-9ea3128fa988": {
+      "id": "e28e3be1-c542-455f-b6be-9ea3128fa988",
+      "parentId": null,
+      "childrenIds": [
+       "ce9c8525-567d-4762-bcd7-7343de9dcef2"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nMy American Express card was duplicated in XXXX, 2016 and according to American Express over {$100000.00} charged to my card. I contacted American Express FRAUD Division and was told not to pay on my account until the account was reconciled. As of this date, my account is still not in balance. I was accessed over {$700.00} is late fees and American Express has not waived the fees. I called them in XX/XX/XXXX, XX/XX/XXXX, XX/XX/XXXX, XX/XX/XXXX and XX/XX/XXXX. I was directed to pay the late charged and fees and American Express would refund the overpayment to me. I am receiving letters addressed to a previous residence. I received a letter stating my late payments will be reported to consumer reporting agencies. This is an abomination XXXX. Complete disrespect for a consumer who has been with Amer Ex for 30 years.\n\"\"\"",
+      "timestamp": 1790954020,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "ce9c8525-567d-4762-bcd7-7343de9dcef2": {
+      "id": "ce9c8525-567d-4762-bcd7-7343de9dcef2",
+      "parentId": "e28e3be1-c542-455f-b6be-9ea3128fa988",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer's American Express card was duplicated in 2016, resulting in over $100,000 in charges. They've contacted American Express multiple times, but the account remains unbalanced, and late fees have been applied.\",\n  \"stated_facts\": [\n    \"Card was duplicated in 2016\",\n    \"Over $100,000 charged to the card\",\n    \"Customer contacted American Express FRAUD Division\",\n    \"Account is still not in balance\",\n    \"Over $700 in late fees applied\",\n    \"Customer called American Express multiple times\",\n    \"Customer received letters addressed to a previous residence\",\n    \"Late payments will be reported to consumer reporting agencies\"\n  ],\n  \"unknowns\": [\n    \"Exact dates of card duplication and charges\",\n    \"Current account balance\",\n    \"Previous residence address\",\n    \"American Express's current status on the account\"\n  ],\n  \"fraud_or_security_concern\": true,\n  \"recommended_routing\": \"Card Fraud & Security\",\n  \"human_review_required\": true,\n  \"rationale\": \"Concerns about card duplication, unbalanced account, and potential identity theft warrant a review of security procedures.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1790954037,
+      "done": true,
+      "usage": {
+       "completion_tokens": 244,
+       "prompt_tokens": 422,
+       "total_tokens": 666
+      }
+     }
+    },
+    "currentId": "ce9c8525-567d-4762-bcd7-7343de9dcef2"
+   },
+   "messages": [
+    {
+     "id": "e28e3be1-c542-455f-b6be-9ea3128fa988",
+     "parentId": null,
+     "childrenIds": [
+      "ce9c8525-567d-4762-bcd7-7343de9dcef2"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nMy American Express card was duplicated in XXXX, 2016 and according to American Express over {$100000.00} charged to my card. I contacted American Express FRAUD Division and was told not to pay on my account until the account was reconciled. As of this date, my account is still not in balance. I was accessed over {$700.00} is late fees and American Express has not waived the fees. I called them in XX/XX/XXXX, XX/XX/XXXX, XX/XX/XXXX, XX/XX/XXXX and XX/XX/XXXX. I was directed to pay the late charged and fees and American Express would refund the overpayment to me. I am receiving letters addressed to a previous residence. I received a letter stating my late payments will be reported to consumer reporting agencies. This is an abomination XXXX. Complete disrespect for a consumer who has been with Amer Ex for 30 years.\n\"\"\"",
+     "timestamp": 1790954020,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "ce9c8525-567d-4762-bcd7-7343de9dcef2",
+     "parentId": "e28e3be1-c542-455f-b6be-9ea3128fa988",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer's American Express card was duplicated in 2016, resulting in over $100,000 in charges. They've contacted American Express multiple times, but the account remains unbalanced, and late fees have been applied.\",\n  \"stated_facts\": [\n    \"Card was duplicated in 2016\",\n    \"Over $100,000 charged to the card\",\n    \"Customer contacted American Express FRAUD Division\",\n    \"Account is still not in balance\",\n    \"Over $700 in late fees applied\",\n    \"Customer called American Express multiple times\",\n    \"Customer received letters addressed to a previous residence\",\n    \"Late payments will be reported to consumer reporting agencies\"\n  ],\n  \"unknowns\": [\n    \"Exact dates of card duplication and charges\",\n    \"Current account balance\",\n    \"Previous residence address\",\n    \"American Express's current status on the account\"\n  ],\n  \"fraud_or_security_concern\": true,\n  \"recommended_routing\": \"Card Fraud & Security\",\n  \"human_review_required\": true,\n  \"rationale\": \"Concerns about card duplication, unbalanced account, and potential identity theft warrant a review of security procedures.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1790954037,
+     "done": true,
+     "usage": {
+      "completion_tokens": 244,
+      "prompt_tokens": 422,
+      "total_tokens": 666
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1790954020000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1790954020,
+  "updated_at": 1790954037,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ },
+ {
+  "id": "0acf6648-8eb2-4b8d-a888-8b0bab2f9dad",
+  "title": "A4 API run 20261002T151238Z | case 2223547 (B) (imported API log, commit c765bea)",
+  "chat": {
+   "id": "0acf6648-8eb2-4b8d-a888-8b0bab2f9dad",
+   "title": "A4 API run 20261002T151238Z | case 2223547 (B) (imported API log, commit c765bea)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": 0.0,
+    "seed": 42,
+    "max_tokens": 600
+   },
+   "history": {
+    "messages": {
+     "d5a9530a-577c-48b6-aef1-0011374d6236": {
+      "id": "d5a9530a-577c-48b6-aef1-0011374d6236",
+      "parentId": null,
+      "childrenIds": [
+       "30b2143f-766d-44d3-9727-ab67fece6732"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nDiscover credit pulled a bait and switch on me as a consumer. I received a balance transfer offer to get 0 % Apr to pay down my balance in full ; giving me until XXXX 2017. They are continuing to charge exorbitant fees, making it difficult for me to pay off the balance. When I wrote to them stating how difficult they have made things for me, they stated, \" Paying down the complete statement each month avoids the charges ''. First off, I understand paying down the statement avoids charges. XXXX does not know me. If he did he would understand that the company I used to work for ( XXXX XXXX ) never paid me for the XXXX I turned in -- we 're talking about three years of XXXX. I have filed a complaint with the Dept of Labor about the company, and it has gone nowhere because the USA seems to allow criminals to go free. I am a XXXX XXXX who should have earned a nice living on the project that I was hired to do. Since I have n't been paid, the only source of my pay comes from a small XXXX check. This makes it exceedingly difficult to pay down my debts ... which I want to do!!!! I wrote to Discover Credit : \" You deliberately did not answer my question. Your company has violated the agreement of allowing a 0 % Apr until XXXX for me, a XXXX American, to catch up my bills. Your answer was emotionally disconnected, and bourgeoisie, but I suppose that 's how you wish your company to be viewed. No. I do not agree with stealing. I will not allow you to steal from me. I am filing a complaint about your company with the FTC ( CFPB ), and will not be paying on this bill or having anything more to do with your shady, lying, thieving, company! This complaint is being filed because Discover Credit broke the terms of the agreement, and have charged such exorbitant charges on my account, bringing the balance to a high amount. I received the 0 % Apr offer thinking this was a XXXX that could get my debt to credit ratio down. They do this to low income people to steal their hard earned money and make them think they can FINALLY pay off their debts. I am trying very hard to get out of the debt hole that credit fees, and shady, dishonest people/companies have deliberately made for me. It is a financial hardship to go through this. It IS a bait and switch tactic that Discover Credit pulled and it needs to be reported to the CFPB agency. I told Discover that they are thieves and liars and cause unneeded stress in my life with their shenanigans. I will not be paying any more statements until they revert to the 0 % Apr agreement that was sent to me. They also had no business keeping an unlawful XXXX charge ( I sent back the item over a month ago -- I DO N'T have it!!! ). Their company is designed to run people into debt and needs to be audited for fraud.\n\"\"\"",
+      "timestamp": 1790954037,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "30b2143f-766d-44d3-9727-ab67fece6732": {
+      "id": "30b2143f-766d-44d3-9727-ab67fece6732",
+      "parentId": "d5a9530a-577c-48b6-aef1-0011374d6236",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer claims Discover credit pulled a bait and switch on a 0% APR balance transfer offer, charging exorbitant fees and breaking the terms of the agreement.\",\n  \"stated_facts\": [\n    \"Received a 0% APR balance transfer offer to pay down the balance in full until XXXX 2017\",\n    \"Continuing to charge exorbitant fees\",\n    \"Paying down the complete statement each month avoids charges\",\n    \"Customer has filed a complaint with the Dept of Labor about a previous employer\",\n    \"Customer has filed a complaint with the FTC (CFPB) about Discover Credit\",\n    \"Customer received an unlawful charge that was sent back over a month ago\"\n  ],\n  \"unknowns\": [\n    \"Exact date of the 0% APR offer\",\n    \"Exact date of the unlawful charge\",\n    \"Amount of the unlawful charge\",\n    \"Amount of the exorbitant fees\",\n    \"Current balance on the account\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer alleges bait and switch tactic, breaking the terms of the 0% APR agreement, and unlawful charges. Human review is required to assess the validity of the claims and determine the next course of action.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1790954056,
+      "done": true,
+      "usage": {
+       "completion_tokens": 284,
+       "prompt_tokens": 851,
+       "total_tokens": 1135
+      }
+     }
+    },
+    "currentId": "30b2143f-766d-44d3-9727-ab67fece6732"
+   },
+   "messages": [
+    {
+     "id": "d5a9530a-577c-48b6-aef1-0011374d6236",
+     "parentId": null,
+     "childrenIds": [
+      "30b2143f-766d-44d3-9727-ab67fece6732"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nDiscover credit pulled a bait and switch on me as a consumer. I received a balance transfer offer to get 0 % Apr to pay down my balance in full ; giving me until XXXX 2017. They are continuing to charge exorbitant fees, making it difficult for me to pay off the balance. When I wrote to them stating how difficult they have made things for me, they stated, \" Paying down the complete statement each month avoids the charges ''. First off, I understand paying down the statement avoids charges. XXXX does not know me. If he did he would understand that the company I used to work for ( XXXX XXXX ) never paid me for the XXXX I turned in -- we 're talking about three years of XXXX. I have filed a complaint with the Dept of Labor about the company, and it has gone nowhere because the USA seems to allow criminals to go free. I am a XXXX XXXX who should have earned a nice living on the project that I was hired to do. Since I have n't been paid, the only source of my pay comes from a small XXXX check. This makes it exceedingly difficult to pay down my debts ... which I want to do!!!! I wrote to Discover Credit : \" You deliberately did not answer my question. Your company has violated the agreement of allowing a 0 % Apr until XXXX for me, a XXXX American, to catch up my bills. Your answer was emotionally disconnected, and bourgeoisie, but I suppose that 's how you wish your company to be viewed. No. I do not agree with stealing. I will not allow you to steal from me. I am filing a complaint about your company with the FTC ( CFPB ), and will not be paying on this bill or having anything more to do with your shady, lying, thieving, company! This complaint is being filed because Discover Credit broke the terms of the agreement, and have charged such exorbitant charges on my account, bringing the balance to a high amount. I received the 0 % Apr offer thinking this was a XXXX that could get my debt to credit ratio down. They do this to low income people to steal their hard earned money and make them think they can FINALLY pay off their debts. I am trying very hard to get out of the debt hole that credit fees, and shady, dishonest people/companies have deliberately made for me. It is a financial hardship to go through this. It IS a bait and switch tactic that Discover Credit pulled and it needs to be reported to the CFPB agency. I told Discover that they are thieves and liars and cause unneeded stress in my life with their shenanigans. I will not be paying any more statements until they revert to the 0 % Apr agreement that was sent to me. They also had no business keeping an unlawful XXXX charge ( I sent back the item over a month ago -- I DO N'T have it!!! ). Their company is designed to run people into debt and needs to be audited for fraud.\n\"\"\"",
+     "timestamp": 1790954037,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "30b2143f-766d-44d3-9727-ab67fece6732",
+     "parentId": "d5a9530a-577c-48b6-aef1-0011374d6236",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer claims Discover credit pulled a bait and switch on a 0% APR balance transfer offer, charging exorbitant fees and breaking the terms of the agreement.\",\n  \"stated_facts\": [\n    \"Received a 0% APR balance transfer offer to pay down the balance in full until XXXX 2017\",\n    \"Continuing to charge exorbitant fees\",\n    \"Paying down the complete statement each month avoids charges\",\n    \"Customer has filed a complaint with the Dept of Labor about a previous employer\",\n    \"Customer has filed a complaint with the FTC (CFPB) about Discover Credit\",\n    \"Customer received an unlawful charge that was sent back over a month ago\"\n  ],\n  \"unknowns\": [\n    \"Exact date of the 0% APR offer\",\n    \"Exact date of the unlawful charge\",\n    \"Amount of the unlawful charge\",\n    \"Amount of the exorbitant fees\",\n    \"Current balance on the account\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer alleges bait and switch tactic, breaking the terms of the 0% APR agreement, and unlawful charges. Human review is required to assess the validity of the claims and determine the next course of action.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1790954056,
+     "done": true,
+     "usage": {
+      "completion_tokens": 284,
+      "prompt_tokens": 851,
+      "total_tokens": 1135
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1790954037000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1790954037,
+  "updated_at": 1790954056,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ },
+ {
+  "id": "5c56063c-65eb-4462-9a8f-3863b6279506",
+  "title": "A4 API run 20261002T151238Z | case 1619439 (B) (imported API log, commit c765bea)",
+  "chat": {
+   "id": "5c56063c-65eb-4462-9a8f-3863b6279506",
+   "title": "A4 API run 20261002T151238Z | case 1619439 (B) (imported API log, commit c765bea)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": 0.0,
+    "seed": 42,
+    "max_tokens": 600
+   },
+   "history": {
+    "messages": {
+     "c7489eed-4695-4dab-8876-3a212bac7e3d": {
+      "id": "c7489eed-4695-4dab-8876-3a212bac7e3d",
+      "parentId": null,
+      "childrenIds": [
+       "c08022f1-6cba-47d2-a2be-3a7f904c757d"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nMy complaint is Chase Amazon Visa did not address my issue in my first complaint to CFPB and Chase Amazon Visa is attempting to increase the charges to my account by adding additional interest and late fees to my account. ( See attached document. ) I have now given up hope for a charge-back because Chase Amazon Visa does not appear to care \" XXXX XXXX '' XXXX XXXX XXXX tried to swindle me out of {$180000.00}. On XXXX XXXX, 2015, Chase Amazon Visa wrote me that they had notified XXXX credit bureau agencies ; XXXX, XXXX and XXXX XXXX that I disagreed with the resolution of the dispute. ( See attached document. ) As of XXXX XXXX, 2015, Chase Amazon Visa had not notified these XXXX agencies that I disagreed with the resolution of the dispute. Instead, on XXXX XXXX, 2015, I received a statement from Chase Amazon Visa which said my \" new balance '' is XXXX and asked for a minimum payment of {$210.00}. ( See attached document. ) By sending me this new statement for my closed Chase Amazon Visa account ( for the original amount of the dispute ) and not alerting the XXXX Credit Reporting Agencies as Chase Amazon Visa said they would, it appears that Chase Amazon Visa is not going report me to these XXXX agencies as they said and end this horrible situation now. It would appear that Chase Amazon Visa is going to continue to send me statements which will incur late charges and interest indefinitely. Then Chase Amazon Visa will sell this new inflated amount to a collection agency. By doing this Chase Amazon Visa will only make this very bad situation much worse. Being the victim of the attempted swindle by \" XXXX XXXX '' aka XXXX XXXX XXXX to take {$180000.00} from me has left me shaken and scared. I caught the scam before \" XXXX XXXX '' XXXX XXXX XXXX XXXX could steal any money from me and alerted Chase Amazon Visa to the situation. Chase Amazon Visa has done nothing to stop what \" XXXX XXXX '' XXXX XXXX XXXX XXXX is doing. On the contrary, Chase Amazon Visa is attempting to create an even worse situation by perpetuating this attempted fraud by \" XXXX XXXX '' XXXX XXXX XXXX XXXX. I have accepted the fact that my excellent credit rating will be ruined by inadvertently becoming a victim to con artists. I realized what was going on in time and did not fall for the attempt by \" XXXX XXXX '' aka XXXX XXXX XXXX to bilk me out of {$180000.00}. However Chase Amazon Visa continues to be a part of this swindle being conducted by '' XXXX XXXX '' XXXX XXXX XXXX XXXX by not ending this terrible situation and doing what they said they would do and report me to the XXXX credit agencies. Chase Amazon Visa continues to be a part of this attempted fraud by sending me statements asking for payment as if nothing ever happened.\n\"\"\"",
+      "timestamp": 1790954056,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "c08022f1-6cba-47d2-a2be-3a7f904c757d": {
+      "id": "c08022f1-6cba-47d2-a2be-3a7f904c757d",
+      "parentId": "c7489eed-4695-4dab-8876-3a212bac7e3d",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer alleges Chase Amazon Visa failed to address their dispute, attempted to increase charges with interest and late fees, and did not notify credit bureaus as promised.\",\n  \"stated_facts\": [\n    \"Customer filed a previous complaint to CFPB\",\n    \"Chase Amazon Visa attempted to increase charges with interest and late fees\",\n    \"Chase Amazon Visa did not notify credit bureaus as promised\",\n    \"Customer received a statement asking for payment on a closed account\",\n    \"Customer believes Chase Amazon Visa is perpetuating an attempted fraud\"\n  ],\n  \"unknowns\": [\n    \"Original amount of the dispute\",\n    \"Amount of the attempted swindle\",\n    \"Credit bureau agencies notified by Chase Amazon Visa\",\n    \"Date of the previous complaint to CFPB\",\n    \"Date of the statement received by the customer\"\n  ],\n  \"fraud_or_security_concern\": true,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer believes Chase Amazon Visa is perpetuating an attempted fraud, and human review is required to assess the situation.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1790954073,
+      "done": true,
+      "usage": {
+       "completion_tokens": 239,
+       "prompt_tokens": 852,
+       "total_tokens": 1091
+      }
+     }
+    },
+    "currentId": "c08022f1-6cba-47d2-a2be-3a7f904c757d"
+   },
+   "messages": [
+    {
+     "id": "c7489eed-4695-4dab-8876-3a212bac7e3d",
+     "parentId": null,
+     "childrenIds": [
+      "c08022f1-6cba-47d2-a2be-3a7f904c757d"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nMy complaint is Chase Amazon Visa did not address my issue in my first complaint to CFPB and Chase Amazon Visa is attempting to increase the charges to my account by adding additional interest and late fees to my account. ( See attached document. ) I have now given up hope for a charge-back because Chase Amazon Visa does not appear to care \" XXXX XXXX '' XXXX XXXX XXXX tried to swindle me out of {$180000.00}. On XXXX XXXX, 2015, Chase Amazon Visa wrote me that they had notified XXXX credit bureau agencies ; XXXX, XXXX and XXXX XXXX that I disagreed with the resolution of the dispute. ( See attached document. ) As of XXXX XXXX, 2015, Chase Amazon Visa had not notified these XXXX agencies that I disagreed with the resolution of the dispute. Instead, on XXXX XXXX, 2015, I received a statement from Chase Amazon Visa which said my \" new balance '' is XXXX and asked for a minimum payment of {$210.00}. ( See attached document. ) By sending me this new statement for my closed Chase Amazon Visa account ( for the original amount of the dispute ) and not alerting the XXXX Credit Reporting Agencies as Chase Amazon Visa said they would, it appears that Chase Amazon Visa is not going report me to these XXXX agencies as they said and end this horrible situation now. It would appear that Chase Amazon Visa is going to continue to send me statements which will incur late charges and interest indefinitely. Then Chase Amazon Visa will sell this new inflated amount to a collection agency. By doing this Chase Amazon Visa will only make this very bad situation much worse. Being the victim of the attempted swindle by \" XXXX XXXX '' aka XXXX XXXX XXXX to take {$180000.00} from me has left me shaken and scared. I caught the scam before \" XXXX XXXX '' XXXX XXXX XXXX XXXX could steal any money from me and alerted Chase Amazon Visa to the situation. Chase Amazon Visa has done nothing to stop what \" XXXX XXXX '' XXXX XXXX XXXX XXXX is doing. On the contrary, Chase Amazon Visa is attempting to create an even worse situation by perpetuating this attempted fraud by \" XXXX XXXX '' XXXX XXXX XXXX XXXX. I have accepted the fact that my excellent credit rating will be ruined by inadvertently becoming a victim to con artists. I realized what was going on in time and did not fall for the attempt by \" XXXX XXXX '' aka XXXX XXXX XXXX to bilk me out of {$180000.00}. However Chase Amazon Visa continues to be a part of this swindle being conducted by '' XXXX XXXX '' XXXX XXXX XXXX XXXX by not ending this terrible situation and doing what they said they would do and report me to the XXXX credit agencies. Chase Amazon Visa continues to be a part of this attempted fraud by sending me statements asking for payment as if nothing ever happened.\n\"\"\"",
+     "timestamp": 1790954056,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "c08022f1-6cba-47d2-a2be-3a7f904c757d",
+     "parentId": "c7489eed-4695-4dab-8876-3a212bac7e3d",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer alleges Chase Amazon Visa failed to address their dispute, attempted to increase charges with interest and late fees, and did not notify credit bureaus as promised.\",\n  \"stated_facts\": [\n    \"Customer filed a previous complaint to CFPB\",\n    \"Chase Amazon Visa attempted to increase charges with interest and late fees\",\n    \"Chase Amazon Visa did not notify credit bureaus as promised\",\n    \"Customer received a statement asking for payment on a closed account\",\n    \"Customer believes Chase Amazon Visa is perpetuating an attempted fraud\"\n  ],\n  \"unknowns\": [\n    \"Original amount of the dispute\",\n    \"Amount of the attempted swindle\",\n    \"Credit bureau agencies notified by Chase Amazon Visa\",\n    \"Date of the previous complaint to CFPB\",\n    \"Date of the statement received by the customer\"\n  ],\n  \"fraud_or_security_concern\": true,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer believes Chase Amazon Visa is perpetuating an attempted fraud, and human review is required to assess the situation.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1790954073,
+     "done": true,
+     "usage": {
+      "completion_tokens": 239,
+      "prompt_tokens": 852,
+      "total_tokens": 1091
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1790954056000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1790954056,
+  "updated_at": 1790954073,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ },
+ {
+  "id": "d3ba5ffe-4354-412d-86ce-5a1972c21c85",
+  "title": "A4 API run 20261002T151238Z | case 1497867 (B) (imported API log, commit c765bea)",
+  "chat": {
+   "id": "d3ba5ffe-4354-412d-86ce-5a1972c21c85",
+   "title": "A4 API run 20261002T151238Z | case 1497867 (B) (imported API log, commit c765bea)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": 0.0,
+    "seed": 42,
+    "max_tokens": 600
+   },
+   "history": {
+    "messages": {
+     "a977efcc-805d-4884-a5d7-0fd3981f323c": {
+      "id": "a977efcc-805d-4884-a5d7-0fd3981f323c",
+      "parentId": null,
+      "childrenIds": [
+       "10d48d1c-9983-45ab-a6f5-bb6b08d390e9"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nSomeone in XXXX apparently contacted XXXX and used my credit card number to subscribe. I do not know how they got the number because the card was not out of my possession. Chase Bank contacted me via computer telephone message telling me that I owed about {$60.00} or some such amount. I then followed prompts to speak with someone at the bank. I told them I knew nothing about why I would have any balance because I had not used the card for years. They had also tacked on late charges -- since I never received a bill of course I had not idea that any money was owed. I contacted XXXX after being told that the charge for XXXX. They told me that someone in XXXX had given the number. They asked me if I knew anybody in XXXX. Never been there and never known anybody from XXXX. Finally at one point Chase admitted the charge was fraudulent but they had not removed the late charges for the unpaid bill, a bill I had never received and had no way of knowing that someone in XXXX had used the number. A couple more phone calls to Chase did not resolve the number. The last time I was switched to XXXX different people becuase nobody could remove the late fees on the fraudulent charge. I have spent several phone calls and many minutes, all because Chase is not willing to remove charges, even after they admit them to be illegitimate,. This organization is unlike XXXX XXXX or XXXX XXXX XXXX in dealing with fraud issues. Never have I been treated so shabbily because some merchant accepted my credit card number for a fraudulent charge. IThis company does not deserve my business but I have heard that closing an account such as this will lower my credit score.\n\"\"\"",
+      "timestamp": 1790954073,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "10d48d1c-9983-45ab-a6f5-bb6b08d390e9": {
+      "id": "10d48d1c-9983-45ab-a6f5-bb6b08d390e9",
+      "parentId": "a977efcc-805d-4884-a5d7-0fd3981f323c",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer's credit card number was used for a fraudulent subscription without their knowledge. Chase Bank initially added late charges, but later admitted the charge was illegitimate.\",\n  \"stated_facts\": [\n    \"Credit card number was used for a fraudulent subscription\",\n    \"Customer did not give out their credit card number\",\n    \"Customer had not used the card for years\",\n    \"Customer never received a bill for the charge\",\n    \"Chase Bank initially added late charges\",\n    \"Chase Bank later admitted the charge was illegitimate\"\n  ],\n  \"unknowns\": [\n    \"How the credit card number was obtained\",\n    \"The exact amount of the fraudulent charge\",\n    \"The merchant who accepted the credit card number\"\n  ],\n  \"fraud_or_security_concern\": true,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer's account was compromised, and the bank initially added illegitimate charges. Human review is necessary to ensure the issue is resolved correctly.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1790954088,
+      "done": true,
+      "usage": {
+       "completion_tokens": 222,
+       "prompt_tokens": 582,
+       "total_tokens": 804
+      }
+     }
+    },
+    "currentId": "10d48d1c-9983-45ab-a6f5-bb6b08d390e9"
+   },
+   "messages": [
+    {
+     "id": "a977efcc-805d-4884-a5d7-0fd3981f323c",
+     "parentId": null,
+     "childrenIds": [
+      "10d48d1c-9983-45ab-a6f5-bb6b08d390e9"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nSomeone in XXXX apparently contacted XXXX and used my credit card number to subscribe. I do not know how they got the number because the card was not out of my possession. Chase Bank contacted me via computer telephone message telling me that I owed about {$60.00} or some such amount. I then followed prompts to speak with someone at the bank. I told them I knew nothing about why I would have any balance because I had not used the card for years. They had also tacked on late charges -- since I never received a bill of course I had not idea that any money was owed. I contacted XXXX after being told that the charge for XXXX. They told me that someone in XXXX had given the number. They asked me if I knew anybody in XXXX. Never been there and never known anybody from XXXX. Finally at one point Chase admitted the charge was fraudulent but they had not removed the late charges for the unpaid bill, a bill I had never received and had no way of knowing that someone in XXXX had used the number. A couple more phone calls to Chase did not resolve the number. The last time I was switched to XXXX different people becuase nobody could remove the late fees on the fraudulent charge. I have spent several phone calls and many minutes, all because Chase is not willing to remove charges, even after they admit them to be illegitimate,. This organization is unlike XXXX XXXX or XXXX XXXX XXXX in dealing with fraud issues. Never have I been treated so shabbily because some merchant accepted my credit card number for a fraudulent charge. IThis company does not deserve my business but I have heard that closing an account such as this will lower my credit score.\n\"\"\"",
+     "timestamp": 1790954073,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "10d48d1c-9983-45ab-a6f5-bb6b08d390e9",
+     "parentId": "a977efcc-805d-4884-a5d7-0fd3981f323c",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer's credit card number was used for a fraudulent subscription without their knowledge. Chase Bank initially added late charges, but later admitted the charge was illegitimate.\",\n  \"stated_facts\": [\n    \"Credit card number was used for a fraudulent subscription\",\n    \"Customer did not give out their credit card number\",\n    \"Customer had not used the card for years\",\n    \"Customer never received a bill for the charge\",\n    \"Chase Bank initially added late charges\",\n    \"Chase Bank later admitted the charge was illegitimate\"\n  ],\n  \"unknowns\": [\n    \"How the credit card number was obtained\",\n    \"The exact amount of the fraudulent charge\",\n    \"The merchant who accepted the credit card number\"\n  ],\n  \"fraud_or_security_concern\": true,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer's account was compromised, and the bank initially added illegitimate charges. Human review is necessary to ensure the issue is resolved correctly.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1790954088,
+     "done": true,
+     "usage": {
+      "completion_tokens": 222,
+      "prompt_tokens": 582,
+      "total_tokens": 804
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1790954073000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1790954073,
+  "updated_at": 1790954088,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ },
+ {
+  "id": "cfbb98d1-8a1c-4775-a8ca-0144c243b043",
+  "title": "A4 API run 20261002T151238Z | case 1389712 (C) (imported API log, commit c765bea)",
+  "chat": {
+   "id": "cfbb98d1-8a1c-4775-a8ca-0144c243b043",
+   "title": "A4 API run 20261002T151238Z | case 1389712 (C) (imported API log, commit c765bea)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": 0.0,
+    "seed": 42,
+    "max_tokens": 600
+   },
+   "history": {
+    "messages": {
+     "e584dab0-4d99-41e3-b5ca-d05b1163039a": {
+      "id": "e584dab0-4d99-41e3-b5ca-d05b1163039a",
+      "parentId": null,
+      "childrenIds": [
+       "eb9f3df6-7ff9-463d-a52c-0b475419914b"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nI made a payment towards my Peoples United Bank Card Services credit card balance a few days before due date on XXXX XXXX, 2015 at the local Peoples Bank office here in XXXX, CT. But when I checked my credit card balance a week ago, that payment had not been applied and my balance was now approaching my limit without said payment. I have been in regular touch with Peoples United Card Services for the past week. I have talked to multiple people, managers, over managers and nothing has been resolved to date. They have ALL the info they need i.e. faxed form from Peoples Branch in XXXX, CT showing that I made the payment, email from me showing the check I wrote and the money having left my checking account. They acknowlege that the payment was made but they have STILL NOT applied it to my credit card. They have charged me a late fee, they are charging me interest every day AND this is affecting my credit rating which was excellent. I need IMMEDIATE help with this. Peoples United Bank Card Services has demonstrated abysmal customer service to someone who has been a customer for almost 25 years. I have paid my bills on time and for many years in full and this is the way they treat their customers. I need your help to urgently resolve this matter. I will be taking my business elsewhere after this and will never use Peoples Bank, Peoples United Card Services again.\n\"\"\"",
+      "timestamp": 1790954088,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "eb9f3df6-7ff9-463d-a52c-0b475419914b": {
+      "id": "eb9f3df6-7ff9-463d-a52c-0b475419914b",
+      "parentId": "e584dab0-4d99-41e3-b5ca-d05b1163039a",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer claims payment made to Peoples United Bank Card Services on XXXX XXXX, 2015 was not applied, resulting in late fee and interest charges.\",\n  \"stated_facts\": [\n    \"Payment made on XXXX XXXX, 2015\",\n    \"Payment not applied to credit card balance\",\n    \"Late fee and interest charges applied\",\n    \"Customer has faxed form and email showing payment\",\n    \"Customer has been in touch with Peoples United Card Services for a week\",\n    \"Customer has been a customer for almost 25 years\"\n  ],\n  \"unknowns\": [\n    \"Exact date of payment (only day and month mentioned)\",\n    \"Amount of payment\",\n    \"Current credit card balance and limit\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer has provided evidence of payment and has been in regular contact with the bank, but the issue remains unresolved.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1790954103,
+      "done": true,
+      "usage": {
+       "completion_tokens": 219,
+       "prompt_tokens": 516,
+       "total_tokens": 735
+      }
+     }
+    },
+    "currentId": "eb9f3df6-7ff9-463d-a52c-0b475419914b"
+   },
+   "messages": [
+    {
+     "id": "e584dab0-4d99-41e3-b5ca-d05b1163039a",
+     "parentId": null,
+     "childrenIds": [
+      "eb9f3df6-7ff9-463d-a52c-0b475419914b"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nI made a payment towards my Peoples United Bank Card Services credit card balance a few days before due date on XXXX XXXX, 2015 at the local Peoples Bank office here in XXXX, CT. But when I checked my credit card balance a week ago, that payment had not been applied and my balance was now approaching my limit without said payment. I have been in regular touch with Peoples United Card Services for the past week. I have talked to multiple people, managers, over managers and nothing has been resolved to date. They have ALL the info they need i.e. faxed form from Peoples Branch in XXXX, CT showing that I made the payment, email from me showing the check I wrote and the money having left my checking account. They acknowlege that the payment was made but they have STILL NOT applied it to my credit card. They have charged me a late fee, they are charging me interest every day AND this is affecting my credit rating which was excellent. I need IMMEDIATE help with this. Peoples United Bank Card Services has demonstrated abysmal customer service to someone who has been a customer for almost 25 years. I have paid my bills on time and for many years in full and this is the way they treat their customers. I need your help to urgently resolve this matter. I will be taking my business elsewhere after this and will never use Peoples Bank, Peoples United Card Services again.\n\"\"\"",
+     "timestamp": 1790954088,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "eb9f3df6-7ff9-463d-a52c-0b475419914b",
+     "parentId": "e584dab0-4d99-41e3-b5ca-d05b1163039a",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer claims payment made to Peoples United Bank Card Services on XXXX XXXX, 2015 was not applied, resulting in late fee and interest charges.\",\n  \"stated_facts\": [\n    \"Payment made on XXXX XXXX, 2015\",\n    \"Payment not applied to credit card balance\",\n    \"Late fee and interest charges applied\",\n    \"Customer has faxed form and email showing payment\",\n    \"Customer has been in touch with Peoples United Card Services for a week\",\n    \"Customer has been a customer for almost 25 years\"\n  ],\n  \"unknowns\": [\n    \"Exact date of payment (only day and month mentioned)\",\n    \"Amount of payment\",\n    \"Current credit card balance and limit\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer has provided evidence of payment and has been in regular contact with the bank, but the issue remains unresolved.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1790954103,
+     "done": true,
+     "usage": {
+      "completion_tokens": 219,
+      "prompt_tokens": 516,
+      "total_tokens": 735
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1790954088000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1790954088,
+  "updated_at": 1790954103,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ },
+ {
+  "id": "cd96a151-1ed4-4e0a-af7e-abcd3d36e69d",
+  "title": "A4 API run 20261002T151238Z | case 1316049 (C) (imported API log, commit c765bea)",
+  "chat": {
+   "id": "cd96a151-1ed4-4e0a-af7e-abcd3d36e69d",
+   "title": "A4 API run 20261002T151238Z | case 1316049 (C) (imported API log, commit c765bea)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": 0.0,
+    "seed": 42,
+    "max_tokens": 600
+   },
+   "history": {
+    "messages": {
+     "0a6bf8db-2dc3-4731-b4d9-3cc907c70f3a": {
+      "id": "0a6bf8db-2dc3-4731-b4d9-3cc907c70f3a",
+      "parentId": null,
+      "childrenIds": [
+       "98c3087d-1855-4aeb-9af6-24675ad92a26"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nI was a care credit consumer which got a credit card for my dental work. I was misled about the terms and just found out that they may have tried to contact me to no avail for the lawsuit. I paid thousands.\n\"\"\"",
+      "timestamp": 1790954103,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "98c3087d-1855-4aeb-9af6-24675ad92a26": {
+      "id": "98c3087d-1855-4aeb-9af6-24675ad92a26",
+      "parentId": "0a6bf8db-2dc3-4731-b4d9-3cc907c70f3a",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer claims they were misled about credit card terms for dental work and paid thousands, also mentions a potential lawsuit.\",\n  \"stated_facts\": [\n    \"Customer has a Care Credit credit card for dental work\",\n    \"Customer was misled about the terms\",\n    \"Customer paid thousands\",\n    \"Potential lawsuit mentioned\"\n  ],\n  \"unknowns\": [\n    \"Specific terms that were misleading\",\n    \"Details about the potential lawsuit\",\n    \"Exact amount paid\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Potential dispute over billing terms and potential lawsuit requires human review to understand customer's concerns.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1790954114,
+      "done": true,
+      "usage": {
+       "completion_tokens": 159,
+       "prompt_tokens": 275,
+       "total_tokens": 434
+      }
+     }
+    },
+    "currentId": "98c3087d-1855-4aeb-9af6-24675ad92a26"
+   },
+   "messages": [
+    {
+     "id": "0a6bf8db-2dc3-4731-b4d9-3cc907c70f3a",
+     "parentId": null,
+     "childrenIds": [
+      "98c3087d-1855-4aeb-9af6-24675ad92a26"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nI was a care credit consumer which got a credit card for my dental work. I was misled about the terms and just found out that they may have tried to contact me to no avail for the lawsuit. I paid thousands.\n\"\"\"",
+     "timestamp": 1790954103,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "98c3087d-1855-4aeb-9af6-24675ad92a26",
+     "parentId": "0a6bf8db-2dc3-4731-b4d9-3cc907c70f3a",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer claims they were misled about credit card terms for dental work and paid thousands, also mentions a potential lawsuit.\",\n  \"stated_facts\": [\n    \"Customer has a Care Credit credit card for dental work\",\n    \"Customer was misled about the terms\",\n    \"Customer paid thousands\",\n    \"Potential lawsuit mentioned\"\n  ],\n  \"unknowns\": [\n    \"Specific terms that were misleading\",\n    \"Details about the potential lawsuit\",\n    \"Exact amount paid\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Potential dispute over billing terms and potential lawsuit requires human review to understand customer's concerns.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1790954114,
+     "done": true,
+     "usage": {
+      "completion_tokens": 159,
+      "prompt_tokens": 275,
+      "total_tokens": 434
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1790954103000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1790954103,
+  "updated_at": 1790954114,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ },
+ {
+  "id": "55eec0f6-d92a-4c9c-9243-c44822e72ab9",
+  "title": "A4 API run 20261002T151238Z | case 1818982 (C) (imported API log, commit c765bea)",
+  "chat": {
+   "id": "55eec0f6-d92a-4c9c-9243-c44822e72ab9",
+   "title": "A4 API run 20261002T151238Z | case 1818982 (C) (imported API log, commit c765bea)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": 0.0,
+    "seed": 42,
+    "max_tokens": 600
+   },
+   "history": {
+    "messages": {
+     "838b709e-6ff4-4e97-9928-943ee93b8915": {
+      "id": "838b709e-6ff4-4e97-9928-943ee93b8915",
+      "parentId": null,
+      "childrenIds": [
+       "fa8af740-1abc-4996-ba13-150e6bcd0b9d"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nMany months, perhaps years ago we set up auto pay with Macy 's department store credit card. Naturally, as we made purchases for XX/XX/2015 at Macy 's we knew that the statement balance would be paid off monthly on XX/XX/XXXX as our past ( prior to this experience ) records show. Fast forward 3 months to XX/XX/XXXX and we 're getting calls letting us know our statement balance is past due. Macy 's is accusing us of calling in on XX/XX/2015 to cancel our auto pay ( which is miraculously the same day our payments are drafted for auto pay ), but are unable to provide any proof i.e. Email record, phone recording, etc. Macy 's is unable to offer any resolution and is keeping the {$67.00} in late fees they charged us, again, without any proof whatsoever. Macy 's has reported a derogatory filing with all credit reporting agencies - my first any only late payment mark in my 14 years of credit history.\n\"\"\"",
+      "timestamp": 1790954114,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "fa8af740-1abc-4996-ba13-150e6bcd0b9d": {
+      "id": "fa8af740-1abc-4996-ba13-150e6bcd0b9d",
+      "parentId": "838b709e-6ff4-4e97-9928-943ee93b8915",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer claims Macy's charged late fees without proof, reported to credit agencies, and cancelled auto pay without record.\",\n  \"stated_facts\": [\n    \"Auto pay was set up with Macy's department store credit card\",\n    \"Purchases were made on XX/XX/2015\",\n    \"Statement balance was paid off monthly\",\n    \"Calls were received about past due balance 3 months later\",\n    \"Macy's accused customer of cancelling auto pay on XX/XX/2015\",\n    \"No proof provided by Macy's\",\n    \"Late fees of $67.00 were charged\",\n    \"Derogatory filing made with credit reporting agencies\"\n  ],\n  \"unknowns\": [\n    \"Exact dates of purchases and auto pay cancellation\",\n    \"Exact date of derogatory filing with credit reporting agencies\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer dispute involves billing error and potential credit reporting issue, requiring human review for resolution.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1790954129,
+      "done": true,
+      "usage": {
+       "completion_tokens": 231,
+       "prompt_tokens": 441,
+       "total_tokens": 672
+      }
+     }
+    },
+    "currentId": "fa8af740-1abc-4996-ba13-150e6bcd0b9d"
+   },
+   "messages": [
+    {
+     "id": "838b709e-6ff4-4e97-9928-943ee93b8915",
+     "parentId": null,
+     "childrenIds": [
+      "fa8af740-1abc-4996-ba13-150e6bcd0b9d"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nMany months, perhaps years ago we set up auto pay with Macy 's department store credit card. Naturally, as we made purchases for XX/XX/2015 at Macy 's we knew that the statement balance would be paid off monthly on XX/XX/XXXX as our past ( prior to this experience ) records show. Fast forward 3 months to XX/XX/XXXX and we 're getting calls letting us know our statement balance is past due. Macy 's is accusing us of calling in on XX/XX/2015 to cancel our auto pay ( which is miraculously the same day our payments are drafted for auto pay ), but are unable to provide any proof i.e. Email record, phone recording, etc. Macy 's is unable to offer any resolution and is keeping the {$67.00} in late fees they charged us, again, without any proof whatsoever. Macy 's has reported a derogatory filing with all credit reporting agencies - my first any only late payment mark in my 14 years of credit history.\n\"\"\"",
+     "timestamp": 1790954114,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "fa8af740-1abc-4996-ba13-150e6bcd0b9d",
+     "parentId": "838b709e-6ff4-4e97-9928-943ee93b8915",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer claims Macy's charged late fees without proof, reported to credit agencies, and cancelled auto pay without record.\",\n  \"stated_facts\": [\n    \"Auto pay was set up with Macy's department store credit card\",\n    \"Purchases were made on XX/XX/2015\",\n    \"Statement balance was paid off monthly\",\n    \"Calls were received about past due balance 3 months later\",\n    \"Macy's accused customer of cancelling auto pay on XX/XX/2015\",\n    \"No proof provided by Macy's\",\n    \"Late fees of $67.00 were charged\",\n    \"Derogatory filing made with credit reporting agencies\"\n  ],\n  \"unknowns\": [\n    \"Exact dates of purchases and auto pay cancellation\",\n    \"Exact date of derogatory filing with credit reporting agencies\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer dispute involves billing error and potential credit reporting issue, requiring human review for resolution.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1790954129,
+     "done": true,
+     "usage": {
+      "completion_tokens": 231,
+      "prompt_tokens": 441,
+      "total_tokens": 672
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1790954114000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1790954114,
+  "updated_at": 1790954129,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ },
+ {
+  "id": "7bafe222-6f64-4c6f-8766-c747bdd390a6",
+  "title": "A4 API run 20261002T151238Z | case 1992538 (C) (imported API log, commit c765bea)",
+  "chat": {
+   "id": "7bafe222-6f64-4c6f-8766-c747bdd390a6",
+   "title": "A4 API run 20261002T151238Z | case 1992538 (C) (imported API log, commit c765bea)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": 0.0,
+    "seed": 42,
+    "max_tokens": 600
+   },
+   "history": {
+    "messages": {
+     "11d79a86-facc-455e-812e-838871ca03a4": {
+      "id": "11d79a86-facc-455e-812e-838871ca03a4",
+      "parentId": null,
+      "childrenIds": [
+       "203a2131-e44d-463e-a62e-3e7c14caa308"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nI signed up for XXXX insurance based on assurances from the insurance company that my XXXX was in their network and XXXX were covered. It cost me {$100.00} to start the insurance and the monthly amount of {$37.00} was to be drafted on my Capital One credit card. After I received the information from the XXXX, I discovered the discrepancies in what I thought I was paying for and what I actually bought. I sent an email on XXXX XXXX, XXXX cancelling the coverage and requesting a refund. No response from the XXXX company, Upon checking my XXXX XXXX Capital One card statement, I saw a charge for the XXXX payment. I called the company on or about XXXX XXXX, XXXX to ask why I was being charged since I cancelled via email on XXXX XXXX, XXXX. I was told by their customer service representative that they would look into whether they had received my cancellation email but I would not be charged after XXXX XXXX and XXXX received a refund of my XXXX XXXX payment. I was assured that my 'membership ' was cancelled effective XXXX XXXX and I would not be charged in the future. It was n't until XXXX XXXX that I saw I was still being charged {$37.00} for the insurance membership on my Capital One credit card. I immediately called the company, sent them the email from XXXX XXXX, XXXX and requested a refund. The customer rep told me she would research whether they had received the XXXX XXXX email but could not do it that day since it was time for her to get off work and it was a Friday. She was to call me the following Monday but my membership was cancelled effective XXXX XXXX. She was not sure if management would refund my payments from XXXX XXXX to XXXX XXXX. The company never contacted me. Any contact was initiated by me on this matter. In the interim, I requested Capital One to reverse the charges/payments for this time period for this company. I sent them a copy of the XXXX XXXX, XXXX email cancelling the insurance membership. Capital One did reverse the charges but them sent me a letter stating I did not send copies of receipts of the charges so they reapplied the charges to my account. Since these were automatic drafts or charges to my account, I never had receipts for the charges. Therefore, I am filing a complaint against Capital One. I would also like to file a complaint against XXXX XXXX XXXX.\n\"\"\"",
+      "timestamp": 1790954129,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "203a2131-e44d-463e-a62e-3e7c14caa308": {
+      "id": "203a2131-e44d-463e-a62e-3e7c14caa308",
+      "parentId": "11d79a86-facc-455e-812e-838871ca03a4",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer disputes recurring charges for insurance membership on Capital One credit card, claims cancellation and refund were promised but not received.\",\n  \"stated_facts\": [\n    \"Customer signed up for insurance based on network and coverage assurances\",\n    \"Customer sent email cancelling coverage and requesting refund on XXXX XXXX, XXXX\",\n    \"Customer was assured cancellation was effective XXXX XXXX and no future charges would be made\",\n    \"Customer was still charged {$37.00} on Capital One credit card on XXXX XXXX\",\n    \"Customer requested Capital One to reverse charges, but they reapplied them due to lack of receipts\",\n    \"Customer never received a refund from the insurance company\"\n  ],\n  \"unknowns\": [\n    \"Exact dates of charges and communications\",\n    \"Receipts for charges (not applicable, as they were automatic drafts)\",\n    \"Insurance company's response to customer's cancellation email\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Dispute involves recurring charges and promised refunds, requires review of customer's communication with the insurance company and Capital One's handling of the dispute.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1790954147,
+      "done": true,
+      "usage": {
+       "completion_tokens": 260,
+       "prompt_tokens": 748,
+       "total_tokens": 1008
+      }
+     }
+    },
+    "currentId": "203a2131-e44d-463e-a62e-3e7c14caa308"
+   },
+   "messages": [
+    {
+     "id": "11d79a86-facc-455e-812e-838871ca03a4",
+     "parentId": null,
+     "childrenIds": [
+      "203a2131-e44d-463e-a62e-3e7c14caa308"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nI signed up for XXXX insurance based on assurances from the insurance company that my XXXX was in their network and XXXX were covered. It cost me {$100.00} to start the insurance and the monthly amount of {$37.00} was to be drafted on my Capital One credit card. After I received the information from the XXXX, I discovered the discrepancies in what I thought I was paying for and what I actually bought. I sent an email on XXXX XXXX, XXXX cancelling the coverage and requesting a refund. No response from the XXXX company, Upon checking my XXXX XXXX Capital One card statement, I saw a charge for the XXXX payment. I called the company on or about XXXX XXXX, XXXX to ask why I was being charged since I cancelled via email on XXXX XXXX, XXXX. I was told by their customer service representative that they would look into whether they had received my cancellation email but I would not be charged after XXXX XXXX and XXXX received a refund of my XXXX XXXX payment. I was assured that my 'membership ' was cancelled effective XXXX XXXX and I would not be charged in the future. It was n't until XXXX XXXX that I saw I was still being charged {$37.00} for the insurance membership on my Capital One credit card. I immediately called the company, sent them the email from XXXX XXXX, XXXX and requested a refund. The customer rep told me she would research whether they had received the XXXX XXXX email but could not do it that day since it was time for her to get off work and it was a Friday. She was to call me the following Monday but my membership was cancelled effective XXXX XXXX. She was not sure if management would refund my payments from XXXX XXXX to XXXX XXXX. The company never contacted me. Any contact was initiated by me on this matter. In the interim, I requested Capital One to reverse the charges/payments for this time period for this company. I sent them a copy of the XXXX XXXX, XXXX email cancelling the insurance membership. Capital One did reverse the charges but them sent me a letter stating I did not send copies of receipts of the charges so they reapplied the charges to my account. Since these were automatic drafts or charges to my account, I never had receipts for the charges. Therefore, I am filing a complaint against Capital One. I would also like to file a complaint against XXXX XXXX XXXX.\n\"\"\"",
+     "timestamp": 1790954129,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "203a2131-e44d-463e-a62e-3e7c14caa308",
+     "parentId": "11d79a86-facc-455e-812e-838871ca03a4",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer disputes recurring charges for insurance membership on Capital One credit card, claims cancellation and refund were promised but not received.\",\n  \"stated_facts\": [\n    \"Customer signed up for insurance based on network and coverage assurances\",\n    \"Customer sent email cancelling coverage and requesting refund on XXXX XXXX, XXXX\",\n    \"Customer was assured cancellation was effective XXXX XXXX and no future charges would be made\",\n    \"Customer was still charged {$37.00} on Capital One credit card on XXXX XXXX\",\n    \"Customer requested Capital One to reverse charges, but they reapplied them due to lack of receipts\",\n    \"Customer never received a refund from the insurance company\"\n  ],\n  \"unknowns\": [\n    \"Exact dates of charges and communications\",\n    \"Receipts for charges (not applicable, as they were automatic drafts)\",\n    \"Insurance company's response to customer's cancellation email\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Dispute involves recurring charges and promised refunds, requires review of customer's communication with the insurance company and Capital One's handling of the dispute.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1790954147,
+     "done": true,
+     "usage": {
+      "completion_tokens": 260,
+      "prompt_tokens": 748,
+      "total_tokens": 1008
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1790954129000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1790954129,
+  "updated_at": 1790954147,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ }
+]

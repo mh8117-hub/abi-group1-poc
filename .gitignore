@@ -6,3 +6,4 @@ data/*_1500.csv
 data/*Heldout*
 __pycache__/
 *.pyc
+_to_delete/

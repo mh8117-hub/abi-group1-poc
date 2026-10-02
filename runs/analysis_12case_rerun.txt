@@ -1,0 +1,19 @@
+﻿runs runs/20261002T212716Z_baseline.jsonl: 12 distinct cases with a model response
+parse status: {'ok': 12, 'repaired': 0, 'invalid': 0, 'failed': 0}
+
+stratum | n | model routing | reference rule | review label Yes | model review Yes | review correct | fraud flag agrees
+A_fraudtext_billing_owner | 4 | 3/4 (75%) | 0/4 (0%) | 4 | 4 | 4/4 (100%) | 3/4 (75%)
+B_fraudtext_fraud_owner | 4 | 1/4 (25%) | 4/4 (100%) | 4 | 4 | 4/4 (100%) | 3/4 (75%)
+C_no_fraudtext_billing_owner | 4 | 4/4 (100%) | 4/4 (100%) | 2 | 4 | 2/4 (50%) | 4/4 (100%)
+ALL | 12 | 8/12 (67%) | 8/12 (67%) | 10 | 12 | 10/12 (83%) | 10/12 (83%)
+
+model routed to Billing: 10/12 (83%)
+review recall 10/10 (100%); review specificity 0/2 (0%)
+model fraud=true: 6; of those routed to Fraud & Security: 2
+model-vs-rule disagreements: 6; model right 3, rule right 3
+
+latency s: median 16.1, p95 19.5, max 19.5; over 10 s: 12/12
+r(latency, completion tokens) = 0.974; r(latency, prompt tokens) = 0.488
+completion tokens 159-284 (median 230); prompt tokens 275-937; throughput 13.2-14.7 tokens/s
+
+reproducibility vs runs/20261002T151238Z_baseline.jsonl: raw text identical 12/12; decisions identical 12/12

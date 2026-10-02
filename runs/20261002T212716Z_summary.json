@@ -1,0 +1,45 @@
+{
+  "run_id": "20261002T212716Z",
+  "git_commit": "67171b9",
+  "endpoint": "http://172.22.42.174:8080/api/chat/completions",
+  "model_requested": "llama-3.1-8b-instruct",
+  "temperature": 0.0,
+  "seed": 42,
+  "max_tokens": 600,
+  "prompt_version": "baseline-v1",
+  "cases_file": "data/dev_sample_cases.csv",
+  "client_host": "Lee",
+  "client_platform": "Windows-11-10.0.26300-SP0",
+  "python": "3.12.0",
+  "n_cases": 12,
+  "parse_status": {
+    "ok": 12,
+    "repaired": 0,
+    "invalid": 0,
+    "failed": 0,
+    "call_error": 0
+  },
+  "routing_correct": 8,
+  "review_flag_correct": 10,
+  "fraud_flag_correct": 10,
+  "by_group": {
+    "A_fraudtext_billing_owner": {
+      "n": 4,
+      "routing_correct": 3
+    },
+    "B_fraudtext_fraud_owner": {
+      "n": 4,
+      "routing_correct": 1
+    },
+    "C_no_fraudtext_billing_owner": {
+      "n": 4,
+      "routing_correct": 4
+    }
+  },
+  "latency_s": {
+    "min": 10.85,
+    "max": 19.46,
+    "median": 16.38
+  },
+  "output_file": "runs\\20261002T212716Z_baseline.jsonl"
+}

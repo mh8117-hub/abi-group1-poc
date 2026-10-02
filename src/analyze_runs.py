@@ -1,6 +1,6 @@
 """Compute every figure reported in the Assignment 4 record directly from run logs.
 
-  python -m src.analyze_runs runs/<run>_baseline.jsonl [--compare runs/<other>_baseline.jsonl]
+  python -m src.analyze_runs runs/<run>_baseline.jsonl [more runs...] [--compare runs/<other>_baseline.jsonl]
                              [--dev path/to/Development_8000.csv]
 
 Reference rule = the team's deterministic baseline: route to Card Fraud & Security when the
@@ -31,13 +31,18 @@ def pearson(x, y):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("run")
+    ap.add_argument("run", nargs="+", help="one or more run logs; later runs override earlier ones per case_id")
     ap.add_argument("--compare")
     ap.add_argument("--dev")
     a = ap.parse_args()
-    R = [r for r in load(a.run) if r.get("parse_status") != "call_error"]
+    merged = {}
+    for path in a.run:
+        for r in load(path):
+            if r.get("parse_status") != "call_error":
+                merged[r["case_id"]] = r
+    R = list(merged.values())
     n = len(R)
-    print(f"run {a.run}: {n} cases with a model response")
+    print(f"runs {', '.join(a.run)}: {n} distinct cases with a model response")
     print("parse status:", {s: sum(r["parse_status"] == s for r in R) for s in ("ok", "repaired", "invalid", "failed")})
 
     rule = lambda r: FRAUD if r["reference"]["fraud_indicator"] == "Yes" else BILLING

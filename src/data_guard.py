@@ -18,8 +18,8 @@ What it enforces
                        consumer later disputed the company's response (post-outcome field).
                    review_ref_intake        : review label with that post-outcome component
                        removed (urgency High/Critical or escalation Yes).
-                   fraud_keyword_hit        : narrative contains a fraud keyword; the
-                       reference fraud flag (and so Fraud & Security routing) is close to this.
+                   fraud_keyword_hit        : narrative matches the 7-term lexical rule that
+                       reproduces the reference fraud flag; Fraud & Security routing requires it.
                    legal_language_hit       : narrative cites a statute, bankruptcy, attorney,
                        "illegal", etc. Compared against regulatory_indicator.
                    stratum                  : A/B/C evidence strata used since Assignment 4.
@@ -85,8 +85,9 @@ FORBIDDEN_IN_MODEL_INPUT = frozenset(
 )
 
 # ---------------------------------------------------------------- 5. label-risk lexicons
-FRAUD_RX = re.compile(r"fraud|scam|unauthori[sz]|stolen|identity theft|\btheft\b|hack|"
-                      r"compromised|skimm|breach|\bsteal")
+# Reproduces the course fraud_indicator exactly on the 653 in-scope Development cases (and
+# 7,702/8,000 overall). Note it fires on "not mine" and misses "compromised" / "breached".
+FRAUD_RX = re.compile(r"fraud|scam|unauthorized|stolen|theft|hack|not mine")
 LEGAL_RX = re.compile(r"fair credit|\bfcba\b|\bfcra\b|truth in lending|\btila\b|regulation z|"
                       r"bankrupt|attorney|lawyer|lawsuit|\bsue\b|illegal|\bcfpb\b|"
                       r"consumer financial protection|violat")

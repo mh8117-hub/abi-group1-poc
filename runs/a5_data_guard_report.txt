@@ -14,7 +14,7 @@ Finding 1 - review label contains a post-outcome component
 
 Finding 2 - Fraud & Security routing follows a lexical fraud flag
   F&S with fraud_indicator=No: 0
-  fraud keyword regex agrees with fraud_indicator: 637/651
+  fraud keyword regex agrees with fraud_indicator: 651/651
 
 Finding 3 - regulatory flag misses explicit legal language
   legal language present: 101; of these regulatory=No: 41 (review=No as well: 20)

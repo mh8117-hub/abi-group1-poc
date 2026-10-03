@@ -50,3 +50,31 @@ On Windows use `py` instead of `python`. Requires Python 3.9+ and network access
 - Development set only. The held-out file is never read by this code; `run_baseline.py` refuses it.
 - 5 development case_ids whose narratives also appear verbatim in the held-out file are excluded.
 - Labels are instructor-created, rule-generated (see `label_provenance`); agreement with them is not bank operating performance.
+
+---
+
+## Assignment 5 candidate: data guard (`mingyu/a5-data-guard`)
+
+A small reusable component for the shared **Data Pipeline / Test Harness**: every sample builder,
+run or evaluation script calls it before touching course data. Standard library only.
+
+| File | Role |
+|---|---|
+| `src/data_guard.py` | Schema check (29 columns, code lists); held-out refusal (file name, `dataset_split`, `HEL-` id); exclusion of dev rows whose narrative duplicates held-out text; Gate 1 scope filter; **input/target boundary** (`build_model_input` returns the narrative only, `assert_input_boundary` rejects targets, surrogates, post-outcome fields and pasted reference text); **label-risk annotations** (`review_post_outcome_only`, `review_ref_intake`, `fraud_keyword_hit`, `legal_language_hit`, `stratum`); `--report` prints the audit figures. |
+| `data/heldout_narrative_sha256.txt` | 1,500 one-way SHA-256 fingerprints of normalised held-out narratives. Lets the guard exclude overlaps without storing or reading held-out text during development. |
+| `tests/test_data_guard.py` | 15 offline tests (split protection, schema, boundary, label-risk logic). |
+| `src/dgx_guard_smoke.py` | Runs 8 guarded dev cases through the existing client/prompt/parser on DGX Spark and logs the payload keys actually sent. |
+| `runs/a5_data_guard_report.txt` | Audit figures reproduced from the Development CSV by the guard. |
+
+```bash
+python -m unittest discover -s tests -v                       # 26 offline tests
+python -m src.data_guard --dev PATH/ABI_Bank_Complaints_Development_8000.csv --report
+python -m src.data_guard --dev PATH/... --out data/dev_billing_guarded.csv   # git-ignored
+python -m src.dgx_guard_smoke --dev PATH/...                  # NYU network + .env token
+```
+
+**Why the boundary matters here.** In the course data `human_review_required` equals
+`urgency High/Critical OR consumer_disputed = Yes OR escalation_required = Yes` on 8,000/8,000 rows.
+`consumer_disputed` is recorded after the company responds, so 82 of the 368 in-scope review = Yes
+labels cannot be known at intake. Report review recall against both the course label and
+`review_ref_intake`, and treat the 82 `review_post_outcome_only` cases as a separate stratum.

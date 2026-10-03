@@ -1,0 +1,22 @@
+A5 data guard report (Development file only)
+rows read 8000; schema problems 0; excluded for held-out overlap 7 ['1582240', '1582247', '2123714', '2124250', '2254079', '2254851', '2312573']
+in scope (Credit card / Billing disputes): 651
+
+Targets
+  routing: {'Card Fraud & Security': 140, 'Card Billing Disputes': 511}
+  human_review_required Yes: 368/651
+  strata: {'A_fraudtext_billing_owner': 27, 'B_fraudtext_fraud_owner': 140, 'C_no_fraudtext_billing_owner': 484}
+
+Finding 1 - review label contains a post-outcome component
+  rule review == High/Critical OR consumer_disputed OR escalation: mismatches 0/8000 (all dev), 0/651 (scope)
+  review Yes ONLY because consumer later disputed: 82/368 Yes labels
+  review_ref_intake Yes: 286/651
+
+Finding 2 - Fraud & Security routing follows a lexical fraud flag
+  F&S with fraud_indicator=No: 0
+  fraud keyword regex agrees with fraud_indicator: 637/651
+
+Finding 3 - regulatory flag misses explicit legal language
+  legal language present: 101; of these regulatory=No: 41 (review=No as well: 20)
+  regulatory=Potential but review=No: 103
+  Insufficient Evidence but review=No: 8/15

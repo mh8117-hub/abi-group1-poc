@@ -7,3 +7,5 @@ data/*Heldout*
 __pycache__/
 *.pyc
 _to_delete/
+# A5 data guard output contains course narratives; regenerate locally
+data/*guarded*.csv

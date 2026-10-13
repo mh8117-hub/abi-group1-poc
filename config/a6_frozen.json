@@ -1,0 +1,39 @@
+{
+ "status": "draft",
+ "experiment": "A6 three-arm comparison: keyword rule / base / prompted / adapted, on one frozen development slice",
+ "owner": "Mingyu He (candidate contribution; not merged into the team branch)",
+ "model": "llama-3.1-8b-instruct via Open WebUI on DGX Spark (POST /api/chat/completions)",
+ "generation": {"temperature": 0, "seed": 42, "max_tokens": 600},
+ "slices": {
+  "eval": "data/a6_manifest.json 'eval' = the A4 81-case sample (27 per stratum; all 27 rule-error cases)",
+  "tuning": "data/a6_manifest.json 'tuning' = 12 cases from the remaining pool (4 B, 4 C intake-review Yes, 4 C No); prompt debugging only",
+  "train_pool": "everything else in the guarded scope; the only cases an adapter or few-shot example may use"
+ },
+ "arms": {
+  "rule": "7-keyword fraud rule for routing; fraud word OR legal language OR 'fee' for review (narrative only)",
+  "base": "prompt baseline-v1 (A4, unchanged)",
+  "prompted": "prompt prompted-v1 (baseline-v1 + team routing and review rules from TW5 section 6; zero-shot)",
+  "adapted": "prompt adapter-v1 (decision-only schema) on the model id that serves the team adapter; not run by this candidate"
+ },
+ "primary_reference": "team route: adjudicated label on stratum A (team/tw5-data-pipeline e7eb32d, data/adjudication/p3_adjudicated_labels.csv; 2 disputed cases excluded and reported separately), course routing_destination on strata B and C",
+ "review_reference_for_floor": "review_ref_intake (urgency High/Critical OR escalation; the post-outcome consumer_disputed component removed)",
+ "comparisons": [["prompted", "base"], ["adapted", "prompted"]],
+ "decision_rule": {
+  "R1_alpha": 0.05,
+  "R1_text": "candidate routes more decided cases correctly (team reference) than the incumbent, exact two-sided McNemar p < R1_alpha",
+  "R2_text": "candidate routes more decided cases correctly than the keyword rule arm (otherwise a deterministic rule is sufficient, TW2 commitment)",
+  "R3_review_recall_floor": 0.95,
+  "R3_text": "review recall against the intake reference is at least the floor (missing a review is the costly error)",
+  "R4_usable_output_floor": 0.95,
+  "R4_text": "at least this share of outputs parse as ok or repaired",
+  "R5_latency_ratio_max": 1.25,
+  "R5_text": "median latency is at most this multiple of the incumbent's",
+  "adopt_if": "all of R1-R5 pass; otherwise the incumbent stays and the failed criteria are reported"
+ },
+ "frozen_on": null,
+ "notes": [
+  "Development data only. The held-out file is never read (data_guard refuses it); this is not the formal evaluation.",
+  "prompted-v1 encodes rules the team wrote after reading the 27 stratum-A cases, so its stratum-A result is optimistic.",
+  "n = 79 decided cases: a McNemar test on this slice can only detect large differences."
+ ]
+}

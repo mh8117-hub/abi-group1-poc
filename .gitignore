@@ -9,3 +9,8 @@ __pycache__/
 _to_delete/
 # A5 data guard output contains course narratives; regenerate locally
 data/*guarded*.csv
+# A6: adapter training export contains course narratives; regenerate with `a6_eval export-sft`
+exports/
+# A6: team-adjudicated labels live in the private team repo (team/tw5-data-pipeline e7eb32d);
+# copy locally for scoring, never publish here
+data/adjudication/

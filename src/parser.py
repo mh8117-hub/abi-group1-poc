@@ -127,7 +127,9 @@ def _normalise_routing(value, repairs, errors):
     return None
 
 
-def parse_model_output(text: str) -> ParseResult:
+def parse_model_output(text: str, required=None) -> ParseResult:
+    """required: optional subset of REQUIRED_FIELDS (A6 adapter-v1 uses the 3 decision fields)."""
+    fields = {k: REQUIRED_FIELDS[k] for k in (required or REQUIRED_FIELDS)}
     repairs, errors = [], []
     if not text or not text.strip():
         return ParseResult("failed", errors=["empty response"])
@@ -140,7 +142,7 @@ def parse_model_output(text: str) -> ParseResult:
         return ParseResult("failed", repairs=repairs, errors=["JSON could not be decoded"])
 
     record = {}
-    for key, expected in REQUIRED_FIELDS.items():
+    for key, expected in fields.items():
         if key not in data:
             errors.append(f"{key}: missing")
             continue
@@ -161,7 +163,7 @@ def parse_model_output(text: str) -> ParseResult:
             if not isinstance(value, str):
                 errors.append(f"{key}: expected string, got {type(value).__name__}")
             record[key] = value
-    extra = sorted(set(data) - set(REQUIRED_FIELDS))
+    extra = sorted(set(data) - set(fields))
     if extra:
         repairs.append("ignored_extra_keys:" + ",".join(extra))
 

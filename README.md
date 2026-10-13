@@ -1,4 +1,63 @@
-# ABI Group 1 — Complaint Intake PoC: baseline candidate contribution (Assignment 4)
+# ABI Group 1 — Complaint Intake PoC: candidate contributions (A4 baseline, A5 data guard, A6 evaluation harness)
+
+## Assignment 6 candidate: three-arm evaluation harness (`mingyu/a6-eval-harness`)
+
+Candidate contribution by Mingyu He for Team Exercise 6 (base vs prompted vs adapted). **Not merged.**
+Question it answers: on the same frozen development cases, does structured prompting or a LoRA adapter
+change routing and review decisions enough to justify its cost, against the incumbent arm **and** the
+7-keyword rule?
+
+| File | Role |
+|---|---|
+| `src/a6_eval.py` | `manifest` (frozen eval / tuning / training-pool split, disjoint by id and narrative hash) · `rule` (keyword comparator) · `run` (base / prompted / adapted arms through data_guard on DGX; resume; keeps Windows awake) · `score` (stratified accuracy with Wilson CIs, team vs course reference, population-weighted accuracy, exact McNemar, frozen decision rule) · `audit` (blind sheet of discordant cases) · `export-sft` (training pool as chat JSONL for an adapter) |
+| `src/a6_prompts.py` | `baseline-v1` (A4, unchanged), `prompted-v1` (team routing + review rules, zero-shot), `adapter-v1` (decision-only schema for a LoRA adapter) |
+| `config/a6_frozen.json` | Design, references and decision rule R1–R5, frozen at `7e3aa0d` before any evaluation run; prompt SHA-256 pins |
+| `data/a6_manifest.json` | 81 eval / 12 tuning / 558 training-pool case ids with narrative fingerprints and course references (no narratives) |
+| `src/a6_repro_check.py` | Checks that the harness's base arm reproduces the A4 outputs of 2 October |
+| `tests/test_a6_eval.py` | 20 offline tests (prompt parity with A4, statistics, rule arm, references, decision rule, audit selection, manifest disjointness, SFT target) |
+
+```bash
+git checkout mingyu/a6-eval-harness
+python -m unittest discover -s tests -v                      # 46 offline tests
+DEV=PATH/ABI_Bank_Complaints_Development_8000.csv
+python -m src.a6_eval manifest --dev "$DEV"                  # must reproduce data/a6_manifest.json exactly
+git show e7eb32d:data/adjudication/p3_adjudicated_labels.csv > data/adjudication/p3_adjudicated_labels.csv   # team repo; git-ignored here
+python -m src.a6_eval rule --dev "$DEV"
+python -m src.a6_eval run  --dev "$DEV" --arm base           # NYU network + .env token
+python -m src.a6_eval run  --dev "$DEV" --arm prompted
+python -m src.a6_eval run  --dev "$DEV" --arm adapted --model <adapter model id>   # once an adapter is served
+python -m src.a6_eval score runs/*_a6_rule_eval.jsonl runs/*_a6_base_eval.jsonl runs/*_a6_prompted_eval.jsonl
+python -m src.a6_eval export-sft --dev "$DEV"                 # exports/ is git-ignored
+```
+
+### Results on DGX Spark (development cases only; `runs/a6_comparison_V1.md`)
+
+Runs on frozen commit `7e3aa0d`, `llama-3.1-8b-instruct`, temperature 0, seed 42: rule `20261013T115712Z`,
+base `20261013T115715Z`, prompted `20261013T122014Z` (81 cases each, 81/81 parsed `ok`). Tuning pilot
+`20261013T115000Z` / `115255Z`; same-day rerun `124047Z` (12/12 byte-identical); adapter-arm plumbing with the
+base model standing in `124600Z` (12/12 parsed, decision-only schema, median 2.5 s).
+
+| Routing correct (V1 reference) | rule | base | prompted |
+|---|---|---|---|
+| A rule-error stratum, team-adjudicated (25) | 5 | 21 | 23 |
+| B course label Fraud & Security (27) | 27 | 3 | 13 |
+| C course label Billing (27) | 27 | 27 | 26 |
+| All decided (79) | 59 | 51 | 62 |
+| Population-weighted | 96.7% | 80.2% | 85.8% |
+| Review recall / specificity vs intake reference | 58/63 · 11/18 | 63/63 · 0/18 | 60/63 · 5/18 |
+| Median latency / output tokens | – | 16.2 s / 234 | 14.3 s / 206 |
+
+V1 verdict (frozen rule): **adopt prompted over base** (13 vs 2 discordant pairs, exact McNemar p = 0.0074; R1–R5 pass).
+The keyword rule's lead on the population-weighted figure comes from strata B and C, whose course labels the same
+keyword rule generated; the pre-registered V2 verdict re-scores after a blind audit of the 25 discordant cases.
+
+Other findings: the training pool (558) contains **no** stratum-A case, so an adapter trained on course labels can
+only learn the keyword rule; the base arm reproduces the A4 messages exactly but only 20/81 raw outputs (79/81
+decisions) match the 2 October logs, while same-day reruns are byte-identical.
+
+---
+
+## Assignment 4 candidate: baseline client (`mingyu/a4-baseline-client`)
 
 Candidate contribution by Mingyu He for Team Exercise 4 (Baseline Benchmark and Prototype Scaffold).
 **Not merged into any team main branch** — the team decides what to adopt.

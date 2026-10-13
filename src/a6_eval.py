@@ -389,12 +389,12 @@ def score_arm(pred: dict, entries: list, adj: dict, scope_strata: dict) -> dict:
     pf = [(e, t) for e, t in decided if pred[e["case_id"]]["route"] == FRAUD]
     s["fs_recall"] = [sum(ok(e, t) for e, t in fs), len(fs)]
     s["fs_precision"] = [sum(t == FRAUD for e, t in pf), len(pf)]
-    total = sum(scope_strata.values())
+    present = [k for k in "ABC" if s["route_team"][k][1]]       # renormalise over strata in the slice
+    total = sum(v for name, v in scope_strata.items() if name[:1] in present)
     w = 0.0
-    for k in "ABC":
+    for k in present:
         c, n = s["route_team"][k]
-        weight = sum(v for name, v in scope_strata.items() if name.startswith(k)) / total
-        w += weight * (c / n if n else 0)
+        w += sum(v for name, v in scope_strata.items() if name.startswith(k)) / total * c / n
     s["route_team_weighted"] = w
     s["disputed"] = {e["case_id"]: pred[e["case_id"]]["route"] for e, t in team if t is None}
 

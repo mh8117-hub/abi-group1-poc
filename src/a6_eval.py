@@ -268,8 +268,14 @@ def cmd_run(a) -> Path:
             if rec.get("type") == "case" and rec["parse_status"] != "call_error":
                 done.add(rec["case_id"])
     meta = run_meta(a.arm, a.slice, cfg, pv)
+    label = a.arm
+    if a.arm == "adapted" and cfg["MODEL_ID"] == load_config()["MODEL_ID"]:
+        if a.slice == "eval":
+            sys.exit("Refusing: the adapted arm on the eval slice needs the adapter's own model id.")
+        meta["stand_in"] = "base model in the adapter slot: plumbing test of adapter-v1, not an adaptation result"
+        label = "adapted-standin"
     if not a.resume:
-        path = REPO_ROOT / "runs" / f"{meta['run_id']}_a6_{a.arm}_{a.slice}.jsonl"
+        path = REPO_ROOT / "runs" / f"{meta['run_id']}_a6_{label}_{a.slice}.jsonl"
     else:
         meta["resumed_file"] = path.name
     keep_awake()
@@ -449,10 +455,10 @@ def cmd_score(a) -> str:
     S, M = {}, {}
     for path in a.runs:
         metas, cases = load_run(path)
-        arm = metas[0]["arm"]
+        arm = metas[0]["arm"] + ("-standin" if metas[0].get("stand_in") else "")
         S[arm] = score_arm(predictions(cases, entries), entries, adj, manifest["scope_strata"])
         M[arm] = metas
-    order = [x for x in ("rule", "base", "prompted", "adapted") if x in S]
+    order = [x for x in ("rule", "base", "prompted", "adapted", "adapted-standin") if x in S]
     L = [f"# A6 comparison on the frozen {a.slice} slice ({len(entries)} cases)", ""]
     for path in a.adjudicated:
         if Path(path).exists():
@@ -571,12 +577,14 @@ def cmd_audit(a) -> list:
 <label><input type=radio name="v_{cid}" value="No"> No</label>
 <input class=note name="n_{cid}" placeholder="one-line reason"></section>""")
     ids = json.dumps([e["course_record_id"] for e in todo])
+    guide = "".join(f"<p>{html.escape(par.replace(chr(10), ' '))}</p>" for par in AUDIT_GUIDE.split("Review (team rule)", 1)
+                    ).replace("<p>: Yes", "<p><b>Review (team rule):</b> Yes")
     page = f"""<!doctype html><html><head><meta charset=utf-8><title>A6 blind audit</title>
 <style>body{{font:15px/1.5 system-ui,sans-serif;max-width:860px;margin:24px auto;padding:0 16px}}
 section{{border-top:1px solid #ccc;padding:8px 0 14px}} .n{{white-space:pre-wrap;background:#f6f6f6;padding:10px}}
-.note{{width:100%;margin-top:6px}} pre{{white-space:pre-wrap;background:#eef4ff;padding:10px}}
+.note{{width:100%;margin-top:6px}} .g{{background:#eef4ff;padding:4px 12px}}
 button{{font-size:16px;padding:8px 14px;margin:16px 0}}</style></head><body>
-<h1>A6 blind audit: {len(todo)} development cases</h1><pre>{html.escape(AUDIT_GUIDE)}</pre>
+<h1>A6 blind audit: {len(todo)} development cases</h1><div class=g>{guide}</div>
 Labeller name: <input id=who> {''.join(items)}
 <button onclick="dl()">Download a6_audit_labels.csv</button>
 <script>const ids={ids};

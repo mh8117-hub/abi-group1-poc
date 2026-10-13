@@ -51,8 +51,25 @@ V1 verdict (frozen rule): **adopt prompted over base** (13 vs 2 discordant pairs
 The keyword rule's lead on the population-weighted figure comes from strata B and C, whose course labels the same
 keyword rule generated; the pre-registered V2 verdict re-scores after a blind audit of the 25 discordant cases.
 
+**V2 (`runs/a6_comparison_V2.md`; blind single-labeller audit `data/a6_audit_labels.csv`, Mingyu He, 13 Oct).**
+Of the 24 audited stratum-B cases that the course labels Fraud & Security, the audit judged 13 Billing, 6 Fraud &
+Security and 5 undecidable; the one audited C case ("took the card and charged it without permission", no keyword)
+was judged Fraud & Security.
+
+| Routing correct (V2 reference, 74 decided) | rule | base | prompted |
+|---|---|---|---|
+| All decided | 40 (54%) | 63 (85%) | 67 (91%) |
+| Population-weighted | 81.2% | 90.7% | 94.8% |
+| Fraud & Security recall · precision | 14/15 · 14/47 | 4/15 · 4/4 | 12/15 · 12/16 |
+
+V2 verdict (frozen rule): **do not adopt prompted over base** — 8 vs 4 discordant pairs, exact McNemar p = 0.39 (R1
+fails; R2–R5 pass). Exploratory, not pre-registered: all 8 prompted-only wins are true Fraud & Security cases (8 vs 0,
+p = 0.008) and all 4 base-only wins are billing cases prompted sent to Fraud & Security (0 vs 4). The symmetric rule
+cannot see that trade-off; Team Exercise 6 should pre-register a consequence-weighted criterion before its next run.
+V2 rests on one labeller and is provisional until a second team member labels the same 25 cases.
+
 Other findings: the training pool (558) contains **no** stratum-A case, so an adapter trained on course labels can
-only learn the keyword rule; the base arm reproduces the A4 messages exactly but only 20/81 raw outputs (79/81
+only learn the keyword rule, which is the weakest arm on the V2 reference (40/74; Fraud & Security precision 14/47); the base arm reproduces the A4 messages exactly but only 20/81 raw outputs (79/81
 decisions) match the 2 October logs, while same-day reruns are byte-identical.
 
 ---

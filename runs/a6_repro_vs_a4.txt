@@ -1,0 +1,3 @@
+cases in both: 81; raw text identical: 20/81; decisions identical: 79/81
+  decision differs: 2124726 {'recommended_routing': ('Card Fraud & Security', 'Card Billing Disputes'), 'human_review_required': (True, True), 'fraud_or_security_concern': (True, True)}
+  decision differs: 2192819 {'recommended_routing': ('Card Billing Disputes', 'Card Fraud & Security'), 'human_review_required': (True, True), 'fraud_or_security_concern': (True, True)}

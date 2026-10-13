@@ -1,0 +1,257 @@
+{
+ "base": {
+  "n": 12,
+  "status": {
+   "ok": 12
+  },
+  "usable": 12,
+  "to_fraud": 0,
+  "route_course": {
+   "A": [
+    0,
+    0
+   ],
+   "B": [
+    0,
+    4
+   ],
+   "C": [
+    8,
+    8
+   ]
+  },
+  "team_decided": 12,
+  "team_correct_ids": [
+   "1290401",
+   "1383542",
+   "1575755",
+   "1686049",
+   "2001274",
+   "2263406",
+   "2267366",
+   "2384802"
+  ],
+  "route_team": {
+   "A": [
+    0,
+    0
+   ],
+   "B": [
+    0,
+    4
+   ],
+   "C": [
+    8,
+    8
+   ]
+  },
+  "fs_recall": [
+   0,
+   4
+  ],
+  "fs_precision": [
+   0,
+   0
+  ],
+  "route_team_weighted": 0.7756410256410257,
+  "disputed": {},
+  "review_course": {
+   "recall": [
+    8,
+    8
+   ],
+   "specificity": [
+    0,
+    4
+   ]
+  },
+  "review_intake": {
+   "recall": [
+    8,
+    8
+   ],
+   "specificity": [
+    0,
+    4
+   ]
+  },
+  "review_team_A": [
+   0,
+   0
+  ],
+  "flag_all": 12,
+  "latency_median": 16.994999999999997,
+  "latency_p95": 31.9,
+  "prompt_tokens_median": 474.0
+ },
+ "prompted": {
+  "n": 12,
+  "status": {
+   "ok": 12
+  },
+  "usable": 12,
+  "to_fraud": 2,
+  "route_course": {
+   "A": [
+    0,
+    0
+   ],
+   "B": [
+    1,
+    4
+   ],
+   "C": [
+    7,
+    8
+   ]
+  },
+  "team_decided": 12,
+  "team_correct_ids": [
+   "1290401",
+   "1383542",
+   "1575755",
+   "1993195",
+   "2001274",
+   "2263406",
+   "2267366",
+   "2384802"
+  ],
+  "route_team": {
+   "A": [
+    0,
+    0
+   ],
+   "B": [
+    1,
+    4
+   ],
+   "C": [
+    7,
+    8
+   ]
+  },
+  "fs_recall": [
+   1,
+   4
+  ],
+  "fs_precision": [
+   1,
+   2
+  ],
+  "route_team_weighted": 0.7347756410256411,
+  "disputed": {},
+  "review_course": {
+   "recall": [
+    7,
+    8
+   ],
+   "specificity": [
+    0,
+    4
+   ]
+  },
+  "review_intake": {
+   "recall": [
+    7,
+    8
+   ],
+   "specificity": [
+    0,
+    4
+   ]
+  },
+  "review_team_A": [
+   0,
+   0
+  ],
+  "flag_all": 11,
+  "latency_median": 14.1,
+  "latency_p95": 19.68,
+  "prompt_tokens_median": 786.0
+ },
+ "adapted-standin": {
+  "n": 12,
+  "status": {
+   "ok": 12
+  },
+  "usable": 12,
+  "to_fraud": 0,
+  "route_course": {
+   "A": [
+    0,
+    0
+   ],
+   "B": [
+    0,
+    4
+   ],
+   "C": [
+    8,
+    8
+   ]
+  },
+  "team_decided": 12,
+  "team_correct_ids": [
+   "1290401",
+   "1383542",
+   "1575755",
+   "1686049",
+   "2001274",
+   "2263406",
+   "2267366",
+   "2384802"
+  ],
+  "route_team": {
+   "A": [
+    0,
+    0
+   ],
+   "B": [
+    0,
+    4
+   ],
+   "C": [
+    8,
+    8
+   ]
+  },
+  "fs_recall": [
+   0,
+   4
+  ],
+  "fs_precision": [
+   0,
+   0
+  ],
+  "route_team_weighted": 0.7756410256410257,
+  "disputed": {},
+  "review_course": {
+   "recall": [
+    7,
+    8
+   ],
+   "specificity": [
+    0,
+    4
+   ]
+  },
+  "review_intake": {
+   "recall": [
+    7,
+    8
+   ],
+   "specificity": [
+    0,
+    4
+   ]
+  },
+  "review_team_A": [
+   0,
+   0
+  ],
+  "flag_all": 11,
+  "latency_median": 2.49,
+  "latency_p95": 2.76,
+  "prompt_tokens_median": 422.0
+ }
+}

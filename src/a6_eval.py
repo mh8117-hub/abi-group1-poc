@@ -54,7 +54,8 @@ USABLE = ("ok", "repaired")
 
 
 def sha256_file(path) -> str:
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    """Content hash with line endings normalised, so Windows (CRLF) and Linux checkouts agree."""
+    return hashlib.sha256(Path(path).read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def git_state() -> str:
@@ -557,7 +558,7 @@ def main(argv=None):
         problems = check_manifest(m)
         if problems:
             sys.exit("Manifest check failed: " + "; ".join(problems))
-        MANIFEST.write_text(json.dumps(m, indent=1) + "\n", encoding="utf-8")
+        MANIFEST.write_text(json.dumps(m, indent=1) + "\n", encoding="utf-8", newline="\n")
         print(f"eval {len(m['eval'])} | tuning {len(m['tuning'])} | train pool {m['train_pool']['n']} "
               f"{m['train_pool']['strata']} | scope {m['scope_n']} {m['scope_strata']}")
         print(f"-> {MANIFEST.relative_to(REPO_ROOT)} (disjointness checks passed)")

@@ -59,13 +59,18 @@ def sha256_file(path) -> str:
 
 
 def git_state() -> str:
-    """Short commit, marked -dirty if tracked code, config or manifest differ from HEAD."""
+    """Short commit, marked -dirty if code, config or manifest CONTENT differs from HEAD.
+
+    Content-based (git diff), not stat-based (git status): on the Windows client with
+    core.autocrlf=true, regenerating the manifest with LF endings made `git status` report it
+    modified although `git diff` was empty, which would have blocked a frozen run."""
+    def git(*args):
+        return subprocess.run(["git", *args], cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.strip()
     try:
-        head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=REPO_ROOT,
-                              capture_output=True, text=True, check=True).stdout.strip()
-        dirty = subprocess.run(["git", "status", "--porcelain", "--", "src", "config", "data/a6_manifest.json"],
-                               cwd=REPO_ROOT, capture_output=True, text=True).stdout.strip()
-        return head + ("-dirty" if dirty else "")
+        head = git("rev-parse", "--short", "HEAD")
+        changed = git("diff", "--name-only", "HEAD", "--", "src", "config", "data/a6_manifest.json")
+        untracked = git("ls-files", "--others", "--exclude-standard", "--", "src", "config")
+        return head + ("-dirty" if changed or untracked else "")
     except Exception:
         return "unknown"
 
@@ -150,14 +155,24 @@ def check_manifest(m: dict) -> list:
     return problems
 
 
-def load_adjudicated(path=ADJUDICATED) -> dict:
-    """course_record_id -> {'route': team route or None if disputed, 'review': 'Yes'/'No'}."""
-    p = Path(path)
-    if not p.exists():
-        return {}
-    with open(p, encoding="utf-8-sig", newline="") as fh:
-        return {r["course_record_id"]: {"route": None if r["route_status"] == "disputed" else r["team_route"],
-                                        "review": r["team_review"]} for r in csv.DictReader(fh)}
+def load_adjudicated(*paths) -> dict:
+    """course_record_id -> {'route': adjudicated route or None if disputed, 'review', 'source'}.
+
+    Same CSV format as the team's p3_adjudicated_labels.csv. Earlier files take precedence, so
+    the team's two-labeller adjudication is never overridden by a later single-labeller audit."""
+    adj = {}
+    for path in paths or (ADJUDICATED,):
+        p = Path(path)
+        if not p.exists():
+            continue
+        with open(p, encoding="utf-8-sig", newline="") as fh:
+            for r in csv.DictReader(fh):
+                if r["course_record_id"] in adj or not r.get("route_status"):
+                    continue
+                adj[r["course_record_id"]] = {
+                    "route": None if r["route_status"] == "disputed" else r["team_route"],
+                    "review": r.get("team_review", ""), "source": p.name}
+    return adj
 
 
 def select_cases(manifest: dict, slice_name: str, dev_path: str) -> list:
@@ -239,6 +254,9 @@ def cmd_run(a) -> Path:
     if a.model:
         cfg["MODEL_ID"] = a.model
     pv = ARMS[a.arm]
+    pinned = frozen.get("prompt_versions", {}).get(pv)
+    if a.slice == "eval" and pinned and pinned != prompt_sha256(pv):
+        sys.exit(f"Refusing: prompt {pv} changed after the design was frozen (sha256 differs from config).")
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     cases = select_cases(manifest, a.slice, a.dev)
 
@@ -320,10 +338,13 @@ def mcnemar_exact(b: int, c: int) -> float:
 
 
 def team_route(e: dict, adj: dict):
-    """Primary reference. Returns (route or None if disputed/unavailable, source)."""
+    """Team reference. Returns (route or None if disputed/unavailable, source).
+
+    An adjudicated label wins in any stratum; stratum A has no usable course label, so an
+    unadjudicated A case is excluded; B and C fall back to the course label."""
+    if e["course_record_id"] in adj:
+        return adj[e["course_record_id"]]["route"], "adjudicated"
     if e["stratum"].startswith("A"):
-        if e["course_record_id"] in adj:
-            return adj[e["course_record_id"]]["route"], "adjudicated"
         return None, "missing"
     return e["ref"]["routing"], "course"
 
@@ -379,7 +400,8 @@ def score_arm(pred: dict, entries: list, adj: dict, scope_strata: dict) -> dict:
 
     s["review_course"] = review("review_course")
     s["review_intake"] = review("review_intake")
-    a_adj = [e for e in entries if e["course_record_id"] in adj]
+    a_adj = [e for e in entries if e["course_record_id"] in adj and e["stratum"].startswith("A")
+             and adj[e["course_record_id"]]["review"] in ("Yes", "No")]
     s["review_team_A"] = [sum(pred[e["case_id"]]["review"] is (adj[e["course_record_id"]]["review"] == "Yes")
                               for e in a_adj), len(a_adj)]
     s["flag_all"] = sum(pred[e["case_id"]]["review"] is True for e in entries)
@@ -422,7 +444,7 @@ def frac(pair) -> str:
 def cmd_score(a) -> str:
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     frozen = json.loads(FROZEN.read_text(encoding="utf-8"))
-    adj = load_adjudicated(a.adjudicated)
+    adj = load_adjudicated(*a.adjudicated)
     entries = manifest[a.slice]
     S, M = {}, {}
     for path in a.runs:
@@ -432,8 +454,13 @@ def cmd_score(a) -> str:
         M[arm] = metas
     order = [x for x in ("rule", "base", "prompted", "adapted") if x in S]
     L = [f"# A6 comparison on the frozen {a.slice} slice ({len(entries)} cases)", ""]
-    L.append(f"Adjudicated reference: {'loaded, ' + str(len(adj)) + ' cases' if adj else 'NOT FOUND (team rows omitted)'}"
-             f" ({Path(a.adjudicated).name}, sha256 {sha256_file(a.adjudicated)[:12] if adj else '-'})")
+    for path in a.adjudicated:
+        if Path(path).exists():
+            src = [e for e in entries if adj.get(e["course_record_id"], {}).get("source") == Path(path).name]
+            L.append(f"Adjudication file {Path(path).name} (sha256 {sha256_file(path)[:12]}): used for "
+                     f"{len(src)} slice cases {dict(sorted(Counter(e['stratum'][:1] for e in src).items()))}")
+        else:
+            L.append(f"Adjudication file {Path(path).name}: NOT FOUND")
     L.append("")
     L.append("| run | arm | commit | prompt | model |")
     L.append("|---|---|---|---|---|")
@@ -441,14 +468,17 @@ def cmd_score(a) -> str:
         m = M[arm][0]
         L.append(f"| {m['run_id']}{' +resume' if len(M[arm]) > 1 else ''} | {arm} | {m['git_commit']} | "
                  f"{m['prompt_version'] or '-'} | {m['model_requested'] or '-'} |")
-    L += ["", "Cells: correct/n (%; Wilson 95% CI). Team reference = adjudicated route on A (disputed excluded), course route on B, C.", ""]
+    L += ["", "Cells: correct/n (%; Wilson 95% CI). Team reference = adjudicated route where one exists "
+          "(disputed excluded), otherwise the course route (B, C only).", ""]
     rows = [
         ("usable outputs (ok/repaired)", lambda s: frac([s["usable"], s["n"]])),
         ("routed to Fraud & Security", lambda s: str(s["to_fraud"])),
         ("routing vs course: A", lambda s: frac(s["route_course"]["A"])),
         ("routing vs course: B", lambda s: frac(s["route_course"]["B"])),
         ("routing vs course: C", lambda s: frac(s["route_course"]["C"])),
-        ("routing vs team: A (adjudicated)", lambda s: frac(s["route_team"]["A"])),
+        ("routing vs team: A", lambda s: frac(s["route_team"]["A"])),
+        ("routing vs team: B", lambda s: frac(s["route_team"]["B"])),
+        ("routing vs team: C", lambda s: frac(s["route_team"]["C"])),
         ("routing vs team: all decided", lambda s: frac([len(s["team_correct_ids"]), s["team_decided"]])),
         ("routing vs team: population-weighted", lambda s: f"{100 * s['route_team_weighted']:.1f}%"),
         ("Fraud & Security recall (team)", lambda s: frac(s["fs_recall"])),
@@ -487,6 +517,84 @@ def cmd_score(a) -> str:
 
 
 # ------------------------------------------------------------------ adapter training data
+# ------------------------------------------------------------------ discordant-case audit
+AUDIT_GUIDE = """Decide from the narrative only. Model outputs and course labels are deliberately hidden.
+Routing (team rule, TW5 section 6): ownership is decided by what happened to the account, not by the
+words used. A charge, card or account the consumer did not authorise or open is Fraud & Security. A
+charge the consumer made but disputes (merchant, fee, posting, payment, refund) is Billing, even when
+the narrative says "scam", "stole" or "not mine". Use "Cannot decide" rather than guessing.
+Review (team rule): Yes when the narrative itself shows possible fraud, a regulatory or legal claim
+(statute, bankruptcy, attorney, "illegal", fee dispute), or too little information to route.
+A later customer dispute is not an intake reason."""
+
+
+def discordant_cases(manifest: dict, runs: list, adj: dict) -> list:
+    """Eval cases with no adjudicated label where at least one model arm's usable route differs
+    from the course route. Cases on which every arm agrees with the course label cannot change
+    a paired comparison between arms, so adjudicating only these is enough for the verdict."""
+    preds = []
+    for path in runs:
+        metas, cases = load_run(path)
+        if metas[0]["arm"] != "rule":
+            preds.append(predictions(cases, manifest["eval"]))
+    out = []
+    for e in manifest["eval"]:
+        if e["course_record_id"] in adj:
+            continue
+        routes = {p[e["case_id"]]["route"] for p in preds if p[e["case_id"]]["status"] in USABLE}
+        if routes - {e["ref"]["routing"]}:
+            out.append(e)
+    return out
+
+
+def cmd_audit(a) -> list:
+    import html
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    adj = load_adjudicated(ADJUDICATED)
+    todo = discordant_cases(manifest, a.runs, adj)
+    by_id = {r["case_id"]: r for r in load_scope(a.dev)[0]}
+    random.Random(a.seed).shuffle(todo)
+    out_dir = Path(a.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "a6_audit_case_ids.csv").write_text(
+        "course_record_id,case_id\n" + "".join(f"{e['course_record_id']},{e['case_id']}\n" for e in todo),
+        encoding="utf-8", newline="\n")
+    items = []
+    for i, e in enumerate(todo, 1):
+        text = html.escape(by_id[e["case_id"]]["consumer_complaint_narrative"])
+        cid = e["course_record_id"]
+        items.append(f"""<section><h3>{i}. {cid}</h3><p class=n>{text}</p>
+<label><input type=radio name="r_{cid}" value="Card Fraud &amp; Security"> Fraud &amp; Security</label>
+<label><input type=radio name="r_{cid}" value="Card Billing Disputes"> Billing</label>
+<label><input type=radio name="r_{cid}" value="DISPUTED"> Cannot decide</label> &nbsp;|&nbsp; Review:
+<label><input type=radio name="v_{cid}" value="Yes"> Yes</label>
+<label><input type=radio name="v_{cid}" value="No"> No</label>
+<input class=note name="n_{cid}" placeholder="one-line reason"></section>""")
+    ids = json.dumps([e["course_record_id"] for e in todo])
+    page = f"""<!doctype html><html><head><meta charset=utf-8><title>A6 blind audit</title>
+<style>body{{font:15px/1.5 system-ui,sans-serif;max-width:860px;margin:24px auto;padding:0 16px}}
+section{{border-top:1px solid #ccc;padding:8px 0 14px}} .n{{white-space:pre-wrap;background:#f6f6f6;padding:10px}}
+.note{{width:100%;margin-top:6px}} pre{{white-space:pre-wrap;background:#eef4ff;padding:10px}}
+button{{font-size:16px;padding:8px 14px;margin:16px 0}}</style></head><body>
+<h1>A6 blind audit: {len(todo)} development cases</h1><pre>{html.escape(AUDIT_GUIDE)}</pre>
+Labeller name: <input id=who> {''.join(items)}
+<button onclick="dl()">Download a6_audit_labels.csv</button>
+<script>const ids={ids};
+function v(n){{const x=document.querySelector('input[name="'+n+'"]:checked');return x?x.value:''}}
+function q(s){{return '"'+String(s).replace(/"/g,'""')+'"'}}
+function dl(){{const who=document.getElementById('who').value||'labeller';
+let rows=['course_record_id,labeller,team_route,route_status,team_review,note'];
+for(const id of ids){{const r=v('r_'+id);if(!r)continue;
+rows.push([id,q(who),q(r),r==='DISPUTED'?'disputed':'single_labeller',v('v_'+id),
+q(document.querySelector('input[name="n_'+id+'"]').value)].join(','))}}
+const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.join('\\n')+'\\n'],{{type:'text/csv'}}));
+a.download='a6_audit_labels.csv';a.click()}}</script></body></html>"""
+    (out_dir / "a6_audit_sheet.html").write_text(page, encoding="utf-8")
+    print(f"{len(todo)} discordant unadjudicated cases {dict(sorted(Counter(e['stratum'][:1] for e in todo).items()))}"
+          f" -> {out_dir / 'a6_audit_sheet.html'} (contains narratives: keep local)")
+    return todo
+
+
 def sft_target(row: dict) -> dict:
     """Assistant target for one training case (row must carry the data_guard annotations)."""
     return {"fraud_or_security_concern": row["fraud_indicator"] == "Yes",
@@ -546,8 +654,14 @@ def main(argv=None):
     p = sub.add_parser("score")
     p.add_argument("runs", nargs="+")
     p.add_argument("--slice", default="eval", choices=("eval", "tuning"))
-    p.add_argument("--adjudicated", default=str(ADJUDICATED))
+    p.add_argument("--adjudicated", nargs="+", default=[str(ADJUDICATED)],
+                   help="adjudication CSVs; earlier files take precedence")
     p.add_argument("--out")
+    p = sub.add_parser("audit")
+    p.add_argument("runs", nargs="+")
+    p.add_argument("--dev", required=True)
+    p.add_argument("--out-dir", default="exports")
+    p.add_argument("--seed", type=int, default=13)
     p = sub.add_parser("export-sft")
     p.add_argument("--dev", required=True)
     p.add_argument("--out", default="exports/a6_sft_train.jsonl")
@@ -568,6 +682,8 @@ def main(argv=None):
         cmd_run(a)
     elif a.cmd == "score":
         cmd_score(a)
+    elif a.cmd == "audit":
+        cmd_audit(a)
     elif a.cmd == "export-sft":
         cmd_export_sft(a)
 

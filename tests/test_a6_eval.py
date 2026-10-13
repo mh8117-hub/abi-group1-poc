@@ -136,6 +136,39 @@ class ReferenceAndScoringTests(unittest.TestCase):
         self.assertFalse(E.verdict("prompted", "base", arms, es, {}, rule)["checks"]["R5_latency_ratio"])
 
 
+class AdjudicationAndAuditTests(unittest.TestCase):
+    def test_earlier_file_takes_precedence_and_any_stratum_is_used(self):
+        import os, tempfile
+        d = tempfile.mkdtemp()
+        head = "course_record_id,team_route,route_status,team_review\n"
+        team = os.path.join(d, "team.csv")
+        audit = os.path.join(d, "audit.csv")
+        open(team, "w").write(head + f"DEV-1,{BILLING},agreed,Yes\n")
+        open(audit, "w").write(head + f"DEV-1,{FRAUD},single_labeller,No\nDEV-4,{BILLING},single_labeller,No\n")
+        adj = E.load_adjudicated(team, audit)
+        self.assertEqual(adj["DEV-1"]["route"], BILLING)              # team file wins
+        self.assertEqual(E.team_route(entry("4", "B_x", FRAUD), adj), (BILLING, "adjudicated"))
+
+    def test_discordant_cases_only(self):
+        import os, tempfile
+        es = [entry("1", "B_x", FRAUD), entry("2", "C_x", BILLING), entry("3", "A_x", BILLING)]
+        m = {"eval": es}
+        d = tempfile.mkdtemp()
+        def write(arm, routes):
+            path = os.path.join(d, arm + ".jsonl")
+            with open(path, "w") as fh:
+                fh.write(json.dumps({"type": "meta", "arm": arm}) + "\n")
+                for cid, r in routes.items():
+                    fh.write(json.dumps({"type": "case", "case_id": cid, "parse_status": "ok",
+                                         "record": {"recommended_routing": r}}) + "\n")
+            return path
+        runs = [write("rule", {"1": FRAUD, "2": FRAUD, "3": FRAUD}),      # rule arm is ignored
+                write("base", {"1": FRAUD, "2": BILLING, "3": BILLING}),
+                write("prompted", {"1": BILLING, "2": BILLING, "3": FRAUD})]
+        adj = {"DEV-3": {"route": BILLING, "review": "Yes", "source": "t"}}
+        self.assertEqual([e["case_id"] for e in E.discordant_cases(m, runs, adj)], ["1"])
+
+
 class ManifestTests(unittest.TestCase):
     def setUp(self):
         self.m = json.loads(E.MANIFEST.read_text(encoding="utf-8"))

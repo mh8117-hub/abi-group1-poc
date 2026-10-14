@@ -21,7 +21,7 @@ git checkout mingyu/a6-eval-harness
 python -m unittest discover -s tests -v                      # 46 offline tests
 DEV=PATH/ABI_Bank_Complaints_Development_8000.csv
 python -m src.a6_eval manifest --dev "$DEV"                  # must reproduce data/a6_manifest.json exactly
-git show e7eb32d:data/adjudication/p3_adjudicated_labels.csv > data/adjudication/p3_adjudicated_labels.csv   # team repo; git-ignored here
+# Team P3 labels (stratum A): NOT in this repo. See "Reference labels and where they live" below.
 python -m src.a6_eval rule --dev "$DEV"
 python -m src.a6_eval run  --dev "$DEV" --arm base           # NYU network + .env token
 python -m src.a6_eval run  --dev "$DEV" --arm prompted
@@ -34,7 +34,7 @@ python -m src.a6_eval export-sft --dev "$DEV"                 # exports/ is git-
 
 Runs on frozen commit `7e3aa0d`, `llama-3.1-8b-instruct`, temperature 0, seed 42: rule `20261013T115712Z`,
 base `20261013T115715Z`, prompted `20261013T122014Z` (81 cases each, 81/81 parsed `ok`). Tuning pilot
-`20261013T115000Z` / `115255Z`; same-day rerun `124047Z` (12/12 byte-identical); adapter-arm plumbing with the
+`20261013T115000Z` / `115255Z`; 12-case rerun `124047Z` about 50 minutes later (12/12 byte-identical: short-interval repeatability for that sample only); adapter-arm plumbing with the
 base model standing in `124600Z` (12/12 parsed, decision-only schema, median 2.5 s).
 
 | Routing correct (V1 reference) | rule | base | prompted |
@@ -51,7 +51,11 @@ V1 verdict (frozen rule): **adopt prompted over base** (13 vs 2 discordant pairs
 The keyword rule's lead on the population-weighted figure comes from strata B and C, whose course labels the same
 keyword rule generated; the pre-registered V2 verdict re-scores after a blind audit of the 25 discordant cases.
 
-**V2 (`runs/a6_comparison_V2.md`; blind single-labeller audit `data/a6_audit_labels.csv`, Mingyu He, 13 Oct).**
+**V2 — provisional reference (`runs/a6_comparison_V2.md`; blind single-labeller audit `data/a6_audit_labels.csv`, Mingyu He, 13 Oct).**
+Only the 25 cases on which a model arm disagreed with the course label were audited. That is enough for the paired
+comparisons between arms (a case where every arm agrees with the label scores the same for every arm), but it does not
+confirm the 29 B/C cases that were not audited: absolute and population-weighted figures below still assume those course
+labels are right, and V2 is not ground truth.
 Of the 24 audited stratum-B cases that the course labels Fraud & Security, the audit judged 13 Billing, 6 Fraud &
 Security and 5 undecidable; the one audited C case ("took the card and charged it without permission", no keyword)
 was judged Fraud & Security.
@@ -66,11 +70,34 @@ V2 verdict (frozen rule): **do not adopt prompted over base** — 8 vs 4 discord
 fails; R2–R5 pass). Exploratory, not pre-registered: all 8 prompted-only wins are true Fraud & Security cases (8 vs 0,
 p = 0.008) and all 4 base-only wins are billing cases prompted sent to Fraud & Security (0 vs 4). The symmetric rule
 cannot see that trade-off; Team Exercise 6 should pre-register a consequence-weighted criterion before its next run.
-V2 rests on one labeller and is provisional until a second team member labels the same 25 cases.
+V2 rests on one labeller (5 of 25 undecidable) and stays provisional until a second team member labels the same 25 cases
+and a random sample of the unaudited cases is checked.
 
 Other findings: the training pool (558) contains **no** stratum-A case, so an adapter trained on course labels can
-only learn the keyword rule, which is the weakest arm on the V2 reference (40/74; Fraud & Security precision 14/47); the base arm reproduces the A4 messages exactly but only 20/81 raw outputs (79/81
-decisions) match the 2 October logs, while same-day reruns are byte-identical.
+see no "fraud words but Billing" example, so its training target is effectively the keyword rule, the weakest arm on
+the provisional V2 reference (40/74; Fraud & Security precision 14/47). No adapter was trained: this is a risk to the
+training target, not a measured adapter result; the base arm reproduces the A4 messages exactly but only 20/81 raw outputs (79/81
+decisions) match the 2 October logs, while a 12-case rerun 50 minutes later was byte-identical. Run the arms being
+compared in one session.
+
+### Reference labels and where they live
+
+| Reference | Cases | Location | How to obtain |
+|---|---|---|---|
+| Course labels (`routing_destination`, review fields) | all 81 | course Development CSV (not committed) | Brightspace course file |
+| Team P3 adjudication (two labellers, TW5) | 27 stratum-A cases | **private team repo** `github.com/emycuadrosr/group1-abi-poc`, branch `team/tw5-data-pipeline`, commit `e7eb32d`, `data/adjudication/p3_adjudicated_labels.csv`, SHA-256 `d1ce0d5ba0e6ddb0228124e43ef659d1af212cad60285af2f35824610959505e` | needs team-repo access (below) |
+| A6 blind audit (one labeller) | 25 discordant B/C cases | this repo, `data/a6_audit_labels.csv` | committed |
+
+```bash
+# with read access to the team repo (ask Emy Cuadros Rayme, repo owner)
+git fetch https://github.com/emycuadrosr/group1-abi-poc team/tw5-data-pipeline
+mkdir -p data/adjudication
+git show e7eb32d:data/adjudication/p3_adjudicated_labels.csv > data/adjudication/p3_adjudicated_labels.csv
+sha256sum data/adjudication/p3_adjudicated_labels.csv     # must match the SHA-256 above
+```
+`e7eb32d` does not exist in this public repo. The file is kept out of it because it is a team artifact in a private
+repository; without it, `score` prints `Adjudication file ... NOT FOUND`, stratum A is excluded from the team-reference
+rows, and only the course-label rows reproduce.
 
 ---
 

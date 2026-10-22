@@ -1,0 +1,57 @@
+{
+ "run": "20261013T122014Z_a6_prompted_eval.jsonl",
+ "run_commit": "7e3aa0d",
+ "model": {
+  "model_id": "llama-3.1-8b-instruct",
+  "prompt_version": "prompted-v1",
+  "prompt_sha256": "5fcc685f22b698476a5244750797d4ab95439c22761046683b7d4668c96ff978"
+ },
+ "layer_version": "a7-authority-v1",
+ "rules_sha256": "a62236e2344035caac399adc12f494b5301456b7b1ca9f31c24e54c1e292a15a",
+ "n": 81,
+ "checks": {
+  "problems": [],
+  "rule_half_matches_logged_rule_arm": "81/81"
+ },
+ "route_basis": {
+  "fraud_floor_held": 34,
+  "rule_and_model_agree": 46,
+  "model_escalation": 1
+ },
+ "mode": {
+  "normal": 81
+ },
+ "deescalation_proposals": 34,
+ "deescalation_proposals_pop_weighted": 0.142,
+ "review_reasons": {
+  "fraud_floor": 55,
+  "routing_conflict": 35,
+  "fee_dispute": 24,
+  "legal_or_regulatory_language": 13,
+  "short_narrative": 2
+ },
+ "review_required": 67,
+ "review_required_pop_weighted": 0.614,
+ "model_advisory_would_add": 11,
+ "review_vs_intake_reference": {
+  "recall": "58/63",
+  "specificity": "9/18",
+  "missed_case_ids": [
+   "DEV-00037",
+   "DEV-00872",
+   "DEV-03364",
+   "DEV-05819",
+   "DEV-05847"
+  ]
+ },
+ "latency_s": {
+  "median": 14.3,
+  "p95": 21.11,
+  "max": 43.2,
+  "would_degrade_at_timeout": {
+   "10": 78,
+   "30": 1,
+   "45": 0
+  }
+ }
+}

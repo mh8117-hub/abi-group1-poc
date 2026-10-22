@@ -1,4 +1,56 @@
-# ABI Group 1 — Complaint Intake PoC: candidate contributions (A4 baseline, A5 data guard, A6 evaluation harness)
+# ABI Group 1 — Complaint Intake PoC: candidate contributions (A4 baseline, A5 data guard, A6 evaluation harness, A7 authority layer)
+
+## Assignment 7 candidate: deterministic authority layer (`mingyu/a7-authority-layer`)
+
+Candidate contribution by Mingyu He for Team Exercise 7 (end-to-end architecture). **Not merged.**
+It is the component between the parser and the employee screen that holds the architecture's
+authority decisions in code, so they can be tested instead of asserted:
+
+| Decision | Rule in code |
+|---|---|
+| Default queue | Asymmetric fraud floor. Keyword rule **or** model can put a case in Card Fraud & Security; the model can **not** take a keyword-flagged case out. On conflict (rule Fraud, model Billing) the default stays Fraud and the packet carries a de-escalation *proposal*. |
+| Leaving Fraud & Security | Employee only: `apply_employee_decision` refuses a de-escalation without a reason code from a fixed list and an authorisation attestation. Escalation needs only an attributable reason code. |
+| Human review | Deterministic triggers only (fraud floor, routing conflict, legal/regulatory language, fee, ≤ 20-word narrative, model failure). The model's review flag is shown as advisory and never sets or clears review. |
+| Degradation | Kill switch (`MODEL_ENABLED=false`), timeout (default 45 s), call error or unparseable reply → rule-only default, review forced, `mode = degraded`. Never blocks a case. |
+| Audit | Packet stores the narrative fingerprint, rule-set SHA-256, prompt SHA-256, model id, latency and a content hash — never the narrative. |
+
+| File | Role |
+|---|---|
+| `src/a7_authority.py` | `decide()` → recommendation packet · `apply_employee_decision()` → audit record · `validate_packet()` (contract + authority invariants) · `run_case()` (live call with timeout/kill switch) · CLI `replay` and `smoke` |
+| `schemas/a7_recommendation.schema.json` | JSON Schema (2020-12) for the packet: the contract for the employee screen and the audit log |
+| `tests/test_a7_authority.py` | 19 offline tests (synthetic narratives): floor, escalation, advisory-only review, degradation, kill switch, employee authority, invariants, hash determinism, no narrative stored, JSON Schema |
+| `runs/a7_replay_20261013T122014Z.{json,txt}` | Replay of the logged A6 DGX replies through the layer |
+
+```bash
+git checkout mingyu/a7-authority-layer
+python -m unittest discover -s tests -v                      # 65 offline tests (46 A4–A6 + 19 A7)
+python -m src.a7_authority replay --run runs/20261013T122014Z_a6_prompted_eval.jsonl \
+       --rule-run runs/20261013T115712Z_a6_rule_eval.jsonl   # no network
+# add  --adjudicated <team p3_adjudicated_labels.csv> data/a6_audit_labels.csv  for the V2 table
+python -m src.a7_authority smoke                             # DGX: NYU network + .env token
+```
+
+**Replay of logged DGX replies** (prompted-v1, llama-3.1-8b-instruct, run `20261013T122014Z` on `7e3aa0d`, 81 development
+cases; no new model calls): 0 contract or invariant problems; the layer's rule half reproduces the logged rule arm on 81/81;
+81/81 packets validate against the JSON Schema. 34 cases are `fraud_floor_held` (de-escalation proposals; about 14% of the
+in-scope population after stratum weighting), 1 `model_escalation`, 46 agree. Review is required on 67/81 (about 61% weighted);
+intake-reference recall 58/63, specificity 9/18; the model's advisory flag would add review on 11 more cases.
+Latency median 14.3 s, p95 21.1 s, max 43.2 s: a 10 s timeout would degrade 78/81 cases, 30 s 1/81, 45 s 0/81.
+
+| Policy, V2 reference (74 decided) | Correct | F&S recall | F&S precision |
+|---|---|---|---|
+| Keyword rule alone | 40/74 | 14/15 | 14/47 |
+| Model alone | 67/74 | 12/15 | 12/16 |
+| Layer default queue, no employee action | 41/74 | 15/15 | 15/48 |
+| Layer + employee accepts every proposal | 67/74 | 12/15 | 12/16 |
+| Layer + employee right on every proposal (upper bound) | 70/74 | 15/15 | 15/19 |
+
+The 34 proposals split 29 Billing / 3 Fraud & Security / 2 disputed on the V2 reference: the employee decides where the
+system lands between 67/74 (rubber-stamping, 3 frauds missed) and 70/74 (no fraud missed). V2 is provisional (single-labeller
+audit beyond the 27 team-adjudicated P3 cases); development cases only; held-out never read.
+
+**DGX status.** `replay` uses replies logged on DGX Spark; the live `smoke` command (3 cases + 1 forced timeout through
+`client.chat`) has not yet been run from this branch.
 
 ## Assignment 6 candidate: three-arm evaluation harness (`mingyu/a6-eval-harness`)
 

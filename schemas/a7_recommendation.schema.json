@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "a7-recommendation-v1",
+  "title": "Group 1 authority-layer recommendation packet (A7 candidate, Mingyu He)",
+  "description": "Output of src/a7_authority.decide(): what the employee screen shows and the audit log stores. A recommendation, never an assignment. Contains a narrative fingerprint, never the narrative.",
+  "type": "object",
+  "required": ["schema_version", "layer_version", "case_ref", "mode", "default_queue", "route_basis",
+               "deescalation_proposal", "human_review", "rule", "model", "authority",
+               "packet_sha256", "created_utc"],
+  "additionalProperties": false,
+  "$defs": {
+    "queue": {"enum": ["Card Billing Disputes", "Card Fraud & Security"]}
+  },
+  "properties": {
+    "schema_version": {"const": "a7-recommendation-v1"},
+    "layer_version": {"type": "string"},
+    "case_ref": {
+      "type": "object", "required": ["case_id", "narrative_sha256"], "additionalProperties": false,
+      "properties": {
+        "case_id": {"type": ["string", "null"]},
+        "narrative_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "mode": {"enum": ["normal", "degraded"],
+             "description": "degraded = no usable model reply (disabled, timeout, call error, unparseable); rule-only default and review forced"},
+    "default_queue": {"$ref": "#/$defs/queue"},
+    "route_basis": {"enum": ["rule_and_model_agree", "model_escalation", "fraud_floor_held", "rule_only_degraded"]},
+    "deescalation_proposal": {
+      "description": "Present only when route_basis = fraud_floor_held: the model proposes Billing, only an employee can accept it",
+      "oneOf": [
+        {"type": "null"},
+        {"type": "object",
+         "required": ["proposed_queue", "proposed_by", "model_rationale", "requires", "allowed_reason_codes", "attestation_text"],
+         "additionalProperties": false,
+         "properties": {
+           "proposed_queue": {"const": "Card Billing Disputes"},
+           "proposed_by": {"const": "model"},
+           "model_rationale": {"type": ["string", "null"]},
+           "requires": {"type": "array", "items": {"type": "string"}},
+           "allowed_reason_codes": {"type": "array", "items": {"enum": [
+             "customer_made_or_allowed_transaction", "fee_interest_or_statement_dispute",
+             "posting_or_duplicate_error", "keyword_used_figuratively"]}},
+           "attestation_text": {"type": "string"}
+         }}
+      ]
+    },
+    "human_review": {
+      "type": "object", "required": ["required", "reasons", "set_by"], "additionalProperties": false,
+      "properties": {
+        "required": {"type": "boolean"},
+        "reasons": {"type": "array", "uniqueItems": true, "items": {"enum": [
+          "fraud_floor", "routing_conflict", "legal_or_regulatory_language", "fee_dispute",
+          "short_narrative", "model_disabled", "model_unavailable", "model_output_unusable"]}},
+        "set_by": {"const": "deterministic_rules"}
+      }
+    },
+    "rule": {
+      "type": "object",
+      "required": ["fraud_keyword_hit", "matched_fraud_terms", "legal_language_hit", "fee_hit", "word_count", "route", "rules_sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "fraud_keyword_hit": {"type": "boolean"},
+        "matched_fraud_terms": {"type": "array", "items": {"type": "string"}},
+        "legal_language_hit": {"type": "boolean"},
+        "fee_hit": {"type": "boolean"},
+        "word_count": {"type": "integer", "minimum": 1},
+        "route": {"$ref": "#/$defs/queue"},
+        "rules_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "model": {
+      "type": "object",
+      "required": ["status", "route", "fraud_or_security_concern", "review_advisory", "rationale", "case_record",
+                   "label", "model_id", "prompt_version", "prompt_sha256", "latency_s", "repairs", "errors"],
+      "additionalProperties": false,
+      "properties": {
+        "status": {"enum": ["ok", "repaired", "invalid", "failed", "unavailable", "disabled"]},
+        "route": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/queue"}]},
+        "fraud_or_security_concern": {"type": ["boolean", "null"]},
+        "review_advisory": {"type": ["boolean", "null"], "description": "model's own review flag: displayed, never sets or clears review"},
+        "rationale": {"type": ["string", "null"]},
+        "case_record": {"oneOf": [{"type": "null"}, {"type": "object",
+          "required": ["case_summary", "stated_facts", "unknowns"],
+          "properties": {"case_summary": {"type": ["string", "null"]},
+                         "stated_facts": {"type": ["array", "null"]},
+                         "unknowns": {"type": ["array", "null"]}}}]},
+        "label": {"type": "string"},
+        "model_id": {"type": ["string", "null"]},
+        "prompt_version": {"type": ["string", "null"]},
+        "prompt_sha256": {"type": ["string", "null"]},
+        "latency_s": {"type": ["number", "null"]},
+        "repairs": {"type": "array"},
+        "errors": {"type": "array"}
+      }
+    },
+    "authority": {
+      "type": "object", "required": ["system_may", "system_may_not", "final_decision_by"],
+      "properties": {
+        "system_may": {"type": "array", "items": {"type": "string"}},
+        "system_may_not": {"type": "array", "items": {"type": "string"}},
+        "final_decision_by": {"const": "employee"}
+      }
+    },
+    "packet_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "created_utc": {"type": "string"}
+  }
+}

@@ -1,0 +1,9 @@
+A7 replay of 20261013T122014Z_a6_prompted_eval.jsonl (commit 7e3aa0d), 81 cases, layer a7-authority-v1
+checks: 0 problems; rule half matches logged rule arm 81/81
+route basis: {'fraud_floor_held': 34, 'rule_and_model_agree': 46, 'model_escalation': 1} | mode: {'normal': 81}
+de-escalation proposals: 34 (population-weighted share 0.142)
+review required: 67/81 (population-weighted 0.614); reasons {'fraud_floor': 55, 'routing_conflict': 35, 'fee_dispute': 24, 'legal_or_regulatory_language': 13, 'short_narrative': 2}
+review vs intake reference: {'recall': '58/63', 'specificity': '9/18', 'missed_case_ids': ['DEV-00037', 'DEV-00872', 'DEV-03364', 'DEV-05819', 'DEV-05847']}
+model advisory would add review on 11 cases
+latency: {'median': 14.3, 'p95': 21.11, 'max': 43.2, 'would_degrade_at_timeout': {'10': 78, '30': 1, '45': 0}}
+wrote runs/a7_replay_20261013T122014Z.json

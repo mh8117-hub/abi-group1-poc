@@ -18,17 +18,23 @@ authority decisions in code, so they can be tested instead of asserted:
 |---|---|
 | `src/a7_authority.py` | `decide()` → recommendation packet · `apply_employee_decision()` → audit record · `validate_packet()` (contract + authority invariants) · `run_case()` (live call with timeout/kill switch) · CLI `replay` and `smoke` |
 | `schemas/a7_recommendation.schema.json` | JSON Schema (2020-12) for the packet: the contract for the employee screen and the audit log |
-| `tests/test_a7_authority.py` | 19 offline tests (synthetic narratives): floor, escalation, advisory-only review, degradation, kill switch, employee authority, invariants, hash determinism, no narrative stored, JSON Schema |
+| `tests/test_a7_authority.py` | 23 offline tests (synthetic narratives): floor, escalation, advisory-only review, degradation, kill switch, employee authority, invariants, hash determinism, no narrative stored, JSON Schema, raw-reply capture and Open WebUI export |
 | `runs/a7_replay_20261013T122014Z.{json,txt}` | Replay of the logged A6 DGX replies through the layer |
 
 ```bash
 git checkout mingyu/a7-authority-layer
-python -m unittest discover -s tests -v                      # 65 offline tests (46 A4–A6 + 19 A7)
+python -m unittest discover -s tests -v                      # 69 offline tests (46 A4–A6 + 23 A7)
 python -m src.a7_authority replay --run runs/20261013T122014Z_a6_prompted_eval.jsonl \
        --rule-run runs/20261013T115712Z_a6_rule_eval.jsonl   # no network
 # add  --adjudicated <team p3_adjudicated_labels.csv> data/a6_audit_labels.csv  for the V2 table
 python -m src.a7_authority smoke                             # DGX: NYU network + .env token
+python -m src.a7_authority export-openwebui runs/<run_id>_a7_smoke.jsonl --out <file>.json   # Open WebUI import
 ```
+
+`smoke` logs, per live call, the packet and a `model_reply` line with the reply text exactly as the DGX returned it,
+token usage and SHA-256 of the system prompt and user message actually sent (from `20261022T1620` onward; earlier smoke
+logs hold parsed fields only). `export-openwebui` turns those lines into an Open WebUI chat-import file: complaint
+message rebuilt and checked against the logged hash, reply unedited.
 
 **Replay of logged DGX replies** (prompted-v1, llama-3.1-8b-instruct, run `20261013T122014Z` on `7e3aa0d`, 81 development
 cases; no new model calls): 0 contract or invariant problems; the layer's rule half reproduces the logged rule arm on 81/81;

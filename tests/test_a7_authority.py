@@ -95,6 +95,23 @@ class Degradation(unittest.TestCase):
         self.assertIn("refund never posted", seen["user"])
         self.assertEqual((p["model"]["latency_s"], p["model"]["prompt_version"]), (1.5, "prompted-v1"))
 
+    def test_on_reply_gets_raw_text_and_exact_messages(self):
+        raw = "```json\n" + reply(BILL) + "\n```"
+        seen = {}
+        p = a.run_case({"MODEL_ID": "m"}, MERCHANT, call=lambda c, m: {"text": raw, "latency_s": 2.0, "model": "m"},
+                       on_reply=lambda r, msgs: seen.update(text=r["text"], msgs=msgs))
+        self.assertEqual(seen["text"], raw)                       # unedited, fences included
+        self.assertEqual(seen["msgs"][0]["role"], "system")
+        self.assertIn("refund never posted", seen["msgs"][1]["content"])
+        self.assertEqual(p["model"]["status"], "repaired")        # the packet keeps parsed fields only
+
+    def test_on_reply_not_called_on_failure(self):
+        def boom(c, m):
+            raise TimeoutError("t")
+        called = []
+        a.run_case({"MODEL_ID": "m"}, MERCHANT, call=boom, on_reply=lambda r, m: called.append(1))
+        self.assertEqual(called, [])
+
     def test_kill_switch(self):
         p = a.run_case({"MODEL_ID": "m", "MODEL_ENABLED": "false"}, MERCHANT,
                        call=lambda c, m: self.fail("model must not be called"))
@@ -165,6 +182,44 @@ class PacketContract(unittest.TestCase):
         schema = json.loads((REPO / "schemas" / "a7_recommendation.schema.json").read_text(encoding="utf-8"))
         for text, r in ((MERCHANT, reply(BILL)), (SCAM_WORD, reply(BILL)), (LEGAL, "")):
             jsonschema.validate(a.decide(text, model_text=r), schema)
+
+    def _smoke_log(self, tmp, tamper=False):
+        from src.a6_prompts import PROMPTS, build_messages
+        raw = "{ \"case_summary\": \"s\",\n \"stated_facts\": [], \"unknowns\": [], \"fraud_or_security_concern\": false," \
+              " \"recommended_routing\": \"Card Billing Disputes\", \"human_review_required\": false, \"rationale\": \"r\" }"
+        msgs = build_messages("prompted-v1", MERCHANT)
+        p = a.decide(MERCHANT, case_id="X1", model_text=raw, model_meta={"latency_s": 3.5},
+                     now="2026-10-22T15:45:00+00:00")
+        user_sha = a._text_sha(msgs[1]["content"] + ("!" if tamper else ""))
+        lines = [{"type": "meta", "run_id": "20261022T154400Z", "git_commit": "abc1234", "model_requested": "m",
+                  "temperature": "0", "seed": "42", "max_tokens": "600", "prompt_version": "prompted-v1"},
+                 dict(p, type="packet", problems=[]),
+                 {"type": "model_reply", "case_id": "X1", "packet_sha256": p["packet_sha256"], "raw_text": raw,
+                  "model": "m", "latency_s": 3.5, "usage": {"total_tokens": 9},
+                  "system_prompt_sha256": a._text_sha(PROMPTS["prompted-v1"]), "user_msg_sha256": user_sha}]
+        run = Path(tmp) / "20261022T154400Z_a7_smoke.jsonl"
+        run.write_text("\n".join(json.dumps(x) for x in lines) + "\n", encoding="utf-8")
+        cases = Path(tmp) / "cases.csv"
+        cases.write_text("case_id,consumer_complaint_narrative\nX1,\"" + MERCHANT + "\"\n", encoding="utf-8")
+        return run, cases, raw
+
+    def test_export_openwebui_keeps_raw_reply(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            run, cases, raw = self._smoke_log(tmp)
+            out = a.export_openwebui(run, cases, Path(tmp) / "imp.json")
+            chats = json.loads(out.read_text(encoding="utf-8"))
+        self.assertEqual(len(chats), 1)
+        msgs = chats[0]["chat"]["messages"]
+        self.assertEqual(msgs[1]["content"], raw)
+        self.assertIn("refund never posted", msgs[0]["content"])
+        self.assertIn("fraud", chats[0]["chat"]["params"]["system"].lower())
+        self.assertIn("raw reply", chats[0]["title"])
+
+    def test_export_refuses_mismatched_message(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            run, cases, _ = self._smoke_log(tmp, tamper=True)
+            with self.assertRaises(ValueError):
+                a.export_openwebui(run, cases, Path(tmp) / "imp.json")
 
     def test_empty_narrative_refused(self):
         with self.assertRaises(ValueError):

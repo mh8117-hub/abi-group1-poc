@@ -27,6 +27,7 @@ Standard library only. Uses the existing data_guard lexicons, parser and prompts
   python -m src.a7_authority replay --run runs/20261013T122014Z_a6_prompted_eval.jsonl \
          --rule-run runs/20261013T115712Z_a6_rule_eval.jsonl [--adjudicated PATH ...]
   python -m src.a7_authority smoke          # DGX: NYU network + .env token
+  python -m src.a7_authority export-openwebui runs/<run_id>_a7_smoke.jsonl --out <file>.json
 """
 import argparse
 import csv
@@ -287,8 +288,11 @@ def validate_packet(p: dict) -> list:
 
 # --------------------------------------------------------------------------- live path
 def run_case(cfg: dict, narrative: str, case_id: str = None, prompt_version: str = "prompted-v1",
-             call=None) -> dict:
-    """Call the model once (with a hard timeout) and return the packet. Any failure degrades."""
+             call=None, on_reply=None) -> dict:
+    """Call the model once (with a hard timeout) and return the packet. Any failure degrades.
+
+    on_reply(reply, messages), if given, receives the raw client reply and the exact messages
+    sent, so an evidence log can keep the reply text unedited (the packet itself never does)."""
     from src.a6_prompts import build_messages, prompt_sha256
     meta = {"model_id": cfg.get("MODEL_ID"), "prompt_version": prompt_version,
             "prompt_sha256": prompt_sha256(prompt_version)}
@@ -298,13 +302,71 @@ def run_case(cfg: dict, narrative: str, case_id: str = None, prompt_version: str
         from src.client import chat as call
     c = dict(cfg)
     c["TIMEOUT_S"] = str(cfg.get("A7_MODEL_TIMEOUT_S", DEFAULT_MODEL_TIMEOUT_S))
+    messages = build_messages(prompt_version, narrative)
     try:
-        reply = call(c, build_messages(prompt_version, narrative))
+        reply = call(c, messages)
     except Exception as exc:          # timeout, network, HTTP, bad body: all degrade, never block
         return decide(narrative, case_id=case_id, model_meta=meta,
                       model_error=f"{type(exc).__name__}: {exc}")
+    if on_reply is not None:
+        on_reply(reply, messages)
     meta.update(model_id=reply.get("model", meta["model_id"]), latency_s=reply.get("latency_s"))
     return decide(narrative, case_id=case_id, model_text=reply.get("text"), model_meta=meta)
+
+
+def _text_sha(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def export_openwebui(run_path, cases_csv, out_path=None) -> Path:
+    """Smoke log -> Open WebUI chat-import JSON (Settings > Data > Import chats).
+
+    One chat per live call: the system prompt in the chat params, the complaint message exactly
+    as sent (checked against the logged SHA-256), and the model's reply exactly as the DGX
+    returned it (the logged raw text, unedited), with server-reported token usage."""
+    from src.a6_prompts import PROMPTS, build_messages
+    run_path = Path(run_path)
+    recs = [json.loads(x) for x in run_path.read_text(encoding="utf-8").splitlines() if x.strip()]
+    meta = next(r for r in recs if r.get("type") == "meta")
+    packets = {r["packet_sha256"]: r for r in recs if r.get("type") == "packet"}
+    with open(cases_csv, encoding="utf-8-sig", newline="") as fh:
+        narr = {r["case_id"]: r["consumer_complaint_narrative"] for r in csv.DictReader(fh)}
+    chats = []
+    for r in (x for x in recs if x.get("type") == "model_reply"):
+        p = packets[r["packet_sha256"]]
+        case = r["case_id"]
+        pv = meta.get("prompt_version", "prompted-v1")
+        msgs = build_messages(pv, narr[case])
+        if g.fingerprint(narr[case]) != p["case_ref"]["narrative_sha256"]:
+            raise ValueError(f"{case}: narrative differs from the logged fingerprint")
+        if _text_sha(msgs[1]["content"]) != r["user_msg_sha256"]:
+            raise ValueError(f"{case}: rebuilt user message differs from the message sent")
+        if _text_sha(PROMPTS[pv]) != r["system_prompt_sha256"]:
+            raise ValueError(f"{case}: system prompt differs from the one sent")
+        model = r.get("model") or meta.get("model_requested")
+        t_reply = int(datetime.fromisoformat(p["created_utc"]).timestamp())
+        t_user = int(t_reply - (r.get("latency_s") or 0))
+        uid, aid, cid = (hashlib.sha256(f"{meta['run_id']}|{case}|{k}".encode()).hexdigest()[:32]
+                         for k in ("user", "assistant", "chat"))
+        user_msg = {"id": uid, "parentId": None, "childrenIds": [aid], "role": "user",
+                    "content": msgs[1]["content"], "timestamp": t_user, "models": [model]}
+        bot_msg = {"id": aid, "parentId": uid, "childrenIds": [], "role": "assistant",
+                   "content": r["raw_text"], "model": model, "modelName": model,
+                   "timestamp": t_reply, "done": True, "usage": r.get("usage") or {}}
+        reasons = "+".join(p["human_review"]["reasons"]) or "none"
+        title = (f"A7 DGX smoke {meta['run_id']} | case {case} | layer {p['route_basis']}, review {reasons} "
+                 f"({r.get('latency_s')} s; imported API log, raw reply, commit {meta.get('git_commit')})")
+        chat = {"id": cid, "title": title, "models": [model],
+                "params": {"system": PROMPTS[pv], "temperature": meta.get("temperature"),
+                           "seed": meta.get("seed"), "max_tokens": meta.get("max_tokens")},
+                "history": {"messages": {uid: user_msg, aid: bot_msg}, "currentId": aid},
+                "messages": [user_msg, bot_msg], "tags": [], "timestamp": t_user * 1000}
+        chats.append({"id": cid, "title": title, "chat": chat, "meta": {"tags": []},
+                      "created_at": t_user, "updated_at": t_reply, "archived": False,
+                      "pinned": False, "share_id": None, "folder_id": None})
+    out = Path(out_path) if out_path else run_path.with_name(f"{meta['run_id']}_a7_openwebui_import.json")
+    out.write_text(json.dumps(chats, ensure_ascii=False, indent=1), encoding="utf-8")
+    return out
 
 
 # --------------------------------------------------------------------------- replay
@@ -460,7 +522,16 @@ def main(argv=None):
     s.add_argument("--ids", nargs="*", default=["1487055", "1834081", "2308225"],
                    help="case_ids from the 81-case development sample. Defaults cover the three "
                         "paths seen in the A6 replay: A fraud_floor_held, B agree-Fraud, C agree-Billing")
+    e = sub.add_parser("export-openwebui", help="smoke log -> Open WebUI chat-import JSON (raw replies)")
+    e.add_argument("run")
+    e.add_argument("--cases", default=str(REPO_ROOT / "data" / "dev_sample_81.csv"))
+    e.add_argument("--out")
     a = ap.parse_args(argv)
+
+    if a.cmd == "export-openwebui":
+        out = export_openwebui(a.run, a.cases, a.out)
+        print(f"wrote {len(json.loads(out.read_text(encoding='utf-8')))} chats -> {out}")
+        return 0
 
     if a.cmd == "replay":
         o = replay(a.run, a.cases, a.manifest, a.rule_run, a.adjudicated)
@@ -477,8 +548,12 @@ def main(argv=None):
         rows = {x["case_id"]: x for x in csv.DictReader(fh)}
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     path = REPO_ROOT / "runs" / f"{run_id}_a7_smoke.jsonl"
+    from src.a6_prompts import prompt_sha256
     append_audit(path, {"type": "meta", "run_id": run_id, "git_commit": git_state(),
                         "endpoint": cfg["OPENWEBUI_BASE_URL"], "model_requested": cfg["MODEL_ID"],
+                        "temperature": cfg["TEMPERATURE"], "seed": cfg["SEED"],
+                        "max_tokens": cfg["MAX_TOKENS"], "prompt_version": "prompted-v1",
+                        "prompt_sha256": prompt_sha256("prompted-v1"),
                         "layer_version": LAYER_VERSION, "rules_sha256": RULES_SHA256})
     plan = [(cid, cfg) for cid in a.ids] + [(a.ids[0], dict(cfg, A7_MODEL_TIMEOUT_S="0.001"))]
     bad = 0
@@ -486,10 +561,19 @@ def main(argv=None):
         row = rows[cid]
         payload = g.build_model_input(row)
         g.assert_input_boundary(payload, row)
-        pk = run_case(c, payload["consumer_complaint_narrative"], case_id=cid)
+        got = {}
+
+        def keep(reply, messages):
+            got.update(raw_text=reply.get("text"), model=reply.get("model"),
+                       latency_s=reply.get("latency_s"), usage=reply.get("usage"),
+                       system_prompt_sha256=_text_sha(messages[0]["content"]),
+                       user_msg_sha256=_text_sha(messages[1]["content"]))
+        pk = run_case(c, payload["consumer_complaint_narrative"], case_id=cid, on_reply=keep)
         probs = validate_packet(pk)
         bad += bool(probs)
         append_audit(path, dict(pk, type="packet", problems=probs))
+        if got:   # raw reply exactly as returned; the packet itself keeps parsed fields only
+            append_audit(path, dict(got, type="model_reply", case_id=cid, packet_sha256=pk["packet_sha256"]))
         print(f"{cid} timeout={c.get('A7_MODEL_TIMEOUT_S', DEFAULT_MODEL_TIMEOUT_S)}s mode={pk['mode']} "
               f"model={pk['model']['status']} latency={pk['model']['latency_s']} "
               f"default={pk['default_queue']} basis={pk['route_basis']} "

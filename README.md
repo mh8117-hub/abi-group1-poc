@@ -49,8 +49,11 @@ The 34 proposals split 29 Billing / 3 Fraud & Security / 2 disputed on the V2 re
 system lands between 67/74 (rubber-stamping, 3 frauds missed) and 70/74 (no fraud missed). V2 is provisional (single-labeller
 audit beyond the 27 team-adjudicated P3 cases); development cases only; held-out never read.
 
-**DGX status.** `replay` uses replies logged on DGX Spark; the live `smoke` command (3 cases + 1 forced timeout through
-`client.chat`) has not yet been run from this branch.
+**DGX status (live, 22 Oct 2026, commit `f2c4b28`, Windows client on NYU VPN, `llama-3.1-8b-instruct`).**
+Run `20261022T154501Z`: 3/3 live calls `ok` (13.4 s, 11.2 s, 20.7 s) on the three replay paths (`1487055` fraud_floor_held,
+`1834081` agree-Fraud, `2308225` agree-Billing); the forced 0.001 s timeout degraded to rule-only with review forced; 0 packet problems.
+Run `20261022T154151Z`, three minutes earlier while the server was slow: all 3 live calls hit the 45 s timeout and degraded
+as designed (rule-only default, `model_unavailable` review, 0 packet problems). Both logs are in `runs/`.
 
 ## Assignment 6 candidate: three-arm evaluation harness (`mingyu/a6-eval-harness`)
 

@@ -60,6 +60,9 @@ Run `20261022T154501Z`: 3/3 live calls `ok` (13.4 s, 11.2 s, 20.7 s) on the thre
 `1834081` agree-Fraud, `2308225` agree-Billing); the forced 0.001 s timeout degraded to rule-only with review forced; 0 packet problems.
 Run `20261022T154151Z`, three minutes earlier while the server was slow: all 3 live calls hit the 45 s timeout and degraded
 as designed (rule-only default, `model_unavailable` review, 0 packet problems). Both logs are in `runs/`.
+Re-run with raw-reply logging on `de32494`: `20261022T162426Z` 3/3 `ok` (13.3 s, 11.1 s, 20.6 s), same paths, model fields identical
+to `154501Z` (temperature 0); its raw replies are the source of the Open WebUI import file (`export-openwebui`).
+`20261022T162058Z`, four minutes earlier, met an overloaded server (a one-word request took 13 s): 3/3 degraded at 45 s, 0 problems.
 
 ## Assignment 6 candidate: three-arm evaluation harness (`mingyu/a6-eval-harness`)
 

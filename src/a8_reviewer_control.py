@@ -6,7 +6,8 @@ Failure it targets (A8 worksheet)
   34 of 81 sampled cases). A reviewer who accepts those proposals by habit ("rubber-stamping")
   moves genuine unauthorised-use cases out of Fraud & Security. The A7 controls (fixed reason code
   + attestation) prove that a person clicked, not that the person evaluated. On the A7 replay the
-  model's proposal is wrong on 5 of 34 (3 Fraud & Security, 2 disputed taxonomy kept by the floor).
+  model's proposal is wrong on 5 of 34 (3 Fraud & Security; 2 the audit could not decide because
+  the narrative does not say whether the charges were authorised, which the floor keeps).
 
 What this module adds on top of src.a7_authority (it never weakens an A7 rule)
   C1 Seeded known-answer proposals (canaries). Adjudicated Fraud & Security cases on which the

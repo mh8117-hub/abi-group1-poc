@@ -10,7 +10,8 @@ It contains no team code: the TE8 integration point in the team app is one call 
 cases the fraud floor holds a case in Card Fraud & Security while the model proposes Billing (A7 replay:
 34 of 81). A reviewer who accepts those proposals by habit moves genuine unauthorised-use cases out of Fraud &
 Security, and the audit record still looks clean: a named reviewer, a valid reason code, an attestation. On the
-A7 replay the proposal is wrong on 5 of 34 (3 Fraud & Security, 2 disputed taxonomy that the floor keeps).
+A7 replay the proposal is wrong on 5 of 34 (3 Fraud & Security; 2 undecidable in the A6 audit because authorisation
+is not stated, which the floor keeps).
 On the TW7 screen (`narrative[:700]`), 27 of the 34 proposals are cut off; in DEV-07257 the only statement of
 unauthorised use starts at character 900.
 
@@ -46,6 +47,8 @@ and DEV-06595, DEV-02570, disputed DEV-03714 and DEV-07139) plus the A7/TW7 smok
 **qualify on the live model** (it still proposes Billing on them). The other 28 proposals come from the logged replies
 (`--live-ids`). Drill output is identical to the replay run `20261102T145633Z`: the rubber-stamper is suspended at item 5
 (failed DEV-06595), its next 29 de-escalation attempts are refused, and the lookback lists its 4 earlier de-escalations.
+The 2 canaries cover only the first 9–18 real proposals of a session (median 14 over 1,000 orders); after that only WATCH
+and its two-person rule protect the queue, which is why the pool must grow before production.
 Run `20261102T144936Z`, 5 minutes earlier, met an overloaded service (a 5-token request took 51 s): the first 2 calls hit
 the A7 45 s timeout and degraded to rule-only with no proposal; the run was stopped and `--timeout` / `--live-ids` added.
 No narrative text appears in either log (checked against the 81-case sample).

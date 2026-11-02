@@ -37,6 +37,7 @@ Every control event is appended to a JSONL audit log. No narrative text is writt
   python -m src.a8_reviewer_control math                       # detection arithmetic, no data
   python -m src.a8_reviewer_control drill --adjudicated P3.csv data/a6_audit_labels.csv   # replay
   python -m src.a8_reviewer_control drill --live --adjudicated ...                        # DGX
+  python -m src.a8_reviewer_control export-openwebui runs/<run_id>_a8_drill_live.jsonl     # WebUI import
 """
 import argparse
 import csv
@@ -562,6 +563,62 @@ def _print(res):
     print("\nDetection arithmetic:", json.dumps(res["math"], indent=1))
 
 
+def export_openwebui(run_path, out_path=None) -> Path:
+    """Live drill log -> Open WebUI chat-import JSON (Settings > Data > Import chats).
+
+    One chat per live DGX call: system prompt in the chat params, the complaint message rebuilt
+    from the committed sample and checked against the logged SHA-256 of the message actually sent,
+    and the model's reply exactly as the DGX returned it (logged raw text, unedited)."""
+    import hashlib
+    from src.a6_prompts import PROMPTS, build_messages
+    run_path = Path(run_path)
+    recs = [json.loads(x) for x in run_path.read_text(encoding="utf-8").splitlines() if x.strip()]
+    meta = next(r for r in recs if r.get("type") == "meta")
+    run_id = run_path.name.split("_")[0]
+    packets = {r["packet_sha256"]: r for r in recs if r.get("type") == "packet"}
+    rows = _narratives()
+    pool = {c["case_id"]: c for c in load_pool()["canaries"]}
+    manifest = json.loads((REPO_ROOT / "data" / "a6_manifest.json").read_text(encoding="utf-8"))
+    rec_ids = {e["case_id"]: e["course_record_id"] for e in manifest["eval"]}
+    pv = meta.get("prompt_version", "prompted-v1")
+    if a7._text_sha(PROMPTS[pv]) != meta.get("prompt_sha256"):
+        raise ValueError("system prompt differs from the one logged for this run")
+    chats = []
+    for r in (x for x in recs if x.get("type") == "model_reply"):
+        p, case = packets[r["packet_sha256"]], r["case_id"]
+        narrative = rows[case]["consumer_complaint_narrative"]
+        msgs = build_messages(pv, narrative)
+        if g.fingerprint(narrative) != p["case_ref"]["narrative_sha256"]:
+            raise ValueError(f"{case}: narrative differs from the logged fingerprint")
+        if a7._text_sha(msgs[1]["content"]) != r["user_msg_sha256"]:
+            raise ValueError(f"{case}: rebuilt user message differs from the message sent")
+        model = r.get("model") or meta.get("model_requested")
+        t_reply = int(datetime.fromisoformat(p["created_utc"]).timestamp())
+        t_user = int(t_reply - (r.get("latency_s") or 0))
+        uid, aid, cid = (hashlib.sha256(f"{run_id}|{case}|{k}".encode()).hexdigest()[:32]
+                         for k in ("user", "assistant", "chat"))
+        user_msg = {"id": uid, "parentId": None, "childrenIds": [aid], "role": "user",
+                    "content": msgs[1]["content"], "timestamp": t_user, "models": [model]}
+        bot_msg = {"id": aid, "parentId": uid, "childrenIds": [], "role": "assistant",
+                   "content": r["raw_text"], "model": model, "modelName": model,
+                   "timestamp": t_reply, "done": True, "usage": r.get("usage") or {}}
+        role = "canary" if case in pool else "real proposal"
+        title = (f"A8 DGX live {run_id} | {rec_ids.get(case, case)} ({case}) | {role} | layer "
+                 f"{p['route_basis']} ({r.get('latency_s')} s; imported API log, raw reply, commit "
+                 f"{meta.get('git_commit')})")
+        chat = {"id": cid, "title": title, "models": [model],
+                "params": {"system": PROMPTS[pv], "temperature": meta.get("temperature"),
+                           "seed": meta.get("seed")},
+                "history": {"messages": {uid: user_msg, aid: bot_msg}, "currentId": aid},
+                "messages": [user_msg, bot_msg], "tags": [], "timestamp": t_user * 1000}
+        chats.append({"id": cid, "title": title, "chat": chat, "meta": {"tags": []},
+                      "created_at": t_user, "updated_at": t_reply, "archived": False,
+                      "pinned": False, "share_id": None, "folder_id": None})
+    out = Path(out_path) if out_path else run_path.with_name(f"{run_id}_a8_openwebui_import.json")
+    out.write_text(json.dumps(chats, ensure_ascii=False, indent=1), encoding="utf-8")
+    return out
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -578,7 +635,14 @@ def main(argv=None):
                    help="team P3 labels first, then data/a6_audit_labels.csv (V2 reference)")
     d.add_argument("--seeds", type=int, default=1000)
     d.add_argument("--seed", type=int, default=8, help="seed of the printed example sessions")
+    e = sub.add_parser("export-openwebui", help="live drill log -> Open WebUI chat-import JSON (raw replies)")
+    e.add_argument("run")
+    e.add_argument("--out")
     a = ap.parse_args(argv)
+    if a.cmd == "export-openwebui":
+        out = export_openwebui(a.run, a.out)
+        print(f"wrote {len(json.loads(out.read_text(encoding='utf-8')))} chats -> {out}")
+        return 0
     if a.cmd == "math":
         print(json.dumps(detection_math(), indent=1))
         return 0

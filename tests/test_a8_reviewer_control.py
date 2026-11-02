@@ -220,6 +220,20 @@ class PoolAndMath(unittest.TestCase):
             self.assertEqual(s["visible_on_tw7_screen"],
                              s["evidence_char_offset"] + len(s["evidence_quote"]) <= c.SCREEN_CHARS)
 
+    def test_openwebui_export_of_committed_live_run(self):
+        run = c.REPO_ROOT / "runs" / "20261102T145412Z_a8_drill_live.jsonl"
+        with tempfile.TemporaryDirectory() as d:
+            out = c.export_openwebui(run, Path(d) / "x.json")
+            chats = json.loads(out.read_text(encoding="utf-8"))
+        self.assertEqual(len(chats), 6)
+        logged = [json.loads(x) for x in run.read_text(encoding="utf-8").splitlines()]
+        raw = {r["case_id"]: r["raw_text"] for r in logged if r["type"] == "model_reply"}
+        for ch in chats:
+            u, b = ch["chat"]["messages"]
+            self.assertIn(b["content"], raw.values())          # reply unedited
+            self.assertTrue(u["content"].startswith("Complaint:"))
+        self.assertEqual(sum("| canary |" in ch["title"] for ch in chats), 2)
+
     def test_detection_math(self):
         m = c.detection_math(5 / 34, 10)
         self.assertEqual(m["streak_rule"]["accepts_in_a_row_needed"], 19)

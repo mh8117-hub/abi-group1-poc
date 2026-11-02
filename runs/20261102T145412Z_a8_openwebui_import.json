@@ -1,0 +1,554 @@
+[
+ {
+  "id": "083b73deaa2b3e427cbd32c6e8c0cce3",
+  "title": "A8 DGX live 20261102T145412Z | DEV-07257 (2121887) | canary | layer fraud_floor_held (15.45 s; imported API log, raw reply, commit 6c5db1b)",
+  "chat": {
+   "id": "083b73deaa2b3e427cbd32c6e8c0cce3",
+   "title": "A8 DGX live 20261102T145412Z | DEV-07257 (2121887) | canary | layer fraud_floor_held (15.45 s; imported API log, raw reply, commit 6c5db1b)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nHow to choose recommended_routing. Decide by what happened to the account, not by the words used:\n1. \"Card Fraud & Security\" if the complaint says that a charge, card or account was made, used or\n   opened WITHOUT the customer's authorisation: a lost or stolen card used by someone else, an\n   account opened in the customer's name, a charge the customer says they never made or allowed,\n   or card or account details taken over by someone else.\n2. \"Card Billing Disputes\" if the customer made or allowed the transaction and disputes it: goods\n   or services not received, refund not credited, wrong amount, duplicate posting, a fee, interest,\n   a payment or a statement problem. This holds even when the customer calls the merchant or the\n   bank a \"scam\" or a \"fraud\", or says money was \"stolen\".\n3. If the complaint does not say whether the transaction was authorised, choose\n   \"Card Billing Disputes\", set human_review_required to true and add the missing fact to \"unknowns\".\n\nHow to set human_review_required:\n- true if the complaint itself shows a possible fraud or security problem, a legal or regulatory\n  claim (a statute, bankruptcy, an attorney, a lawsuit, \"illegal\"), a dispute about a fee, or too\n  little information to choose the routing.\n- false otherwise. A customer who is upset, or who might dispute the outcome later, is not by\n  itself a reason for review.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": "0",
+    "seed": "42"
+   },
+   "history": {
+    "messages": {
+     "147a9b0c392443b5b7f554110cd71e44": {
+      "id": "147a9b0c392443b5b7f554110cd71e44",
+      "parentId": null,
+      "childrenIds": [
+       "0fccfcf4595ac6316ea9949711638eff"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nI will try to make this as short as possible. 2 years ago I had an issue with Synchrony Bank/Paypalsmartconnect. I had noticed that there were monthly payments that I had made not posted to my account. It took me numerous times to even manage to get any help from someone with this company about this issue. Every time I called, I would tell whom ever I spoke with that I had statements from my bank showing that the payments were accepted by them and where did they put the money? They would just ignore what I was telling them and say that they did n't receive the payment. After quite a few try 's, I finally got someone to help me, so I thought. We had agreed to put my account on a freeze until they could figure out what the problem was. I was sending them a package that included my payment information with the receipts from my bank stating that it was paid, etc. Within that time, there was another charge to my card that was not mine and I informed them of this and they were going to look into this too. After I sent them the package, I never heard another word from them via mail, phone, email. Not another bill or anything. Fast forward to now : I had run my credit report ( because I am applying for a mortgage ) and saw this account on there as a \" charge-off ''. I was beyond upset of course. When I called Synchrony Bank, I was told that they could n't help me and that my account was turned over to a collection agency ( XXXX ) and to call them. So I did and when talking with them, I asked why I was never notified about this collection account and they read me back all the contact information that they had for me and it was completely incorrect! So all this time they were not able to contact me concerning this debt because Synchrony Bank gave them the wrong info. So now the only way I can even talk to Synchrony about the original issue with this account and to try and straighten it out was to pay the collection agency what they wanted and then Synchrony would then have the account back and would be able to talk to me. I was also advised that I could not dispute this case if I wanted to get approved for the mortgage that I was trying to get, so of course I paid the fee that the collection agency wanted because I did n't have a choice. When I was able to talk to someone at the bank, they were not very helpful with the remaining problem and with the current issue of how they were going to clear this up with my credit since they were the ones at fault. It was like they had all previous conversations completely wiped out of their system. I was basically told that I was out of luck! So now my question is, what do I do next? I still have some of the information showing some payments that were never posted to my account ( it was originally XXXX, but I only have XXXX proof of payments at the moment ). If this was all taken care of when they said they were going to, the balance that I just paid would have been less than half ( no late fees, etc. ) and this would be an issue on my credit report. Which of course is keeping me from getting a loan! I have several complaints about this banking institution. Something must be done.\n\"\"\"",
+      "timestamp": 1793631252,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "0fccfcf4595ac6316ea9949711638eff": {
+      "id": "0fccfcf4595ac6316ea9949711638eff",
+      "parentId": "147a9b0c392443b5b7f554110cd71e44",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer had issues with Synchrony Bank/Paypal, payments not posted, incorrect contact info, and a charge-off on their credit report.\",\n  \"stated_facts\": [\n    \"Customer had monthly payments not posted to their account 2 years ago\",\n    \"Customer had to send a package with payment information and receipts to Synchrony Bank\",\n    \"Customer was told their account was turned over to a collection agency with incorrect contact info\",\n    \"Customer paid the collection agency to resolve the issue and clear their credit\",\n    \"Customer still has some proof of payments that were never posted\"\n  ],\n  \"unknowns\": [\n    \"Amount of payments not posted\",\n    \"Total amount paid to the collection agency\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Possible dispute about a fee and incorrect contact info, but no clear indication of fraud or security issue.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1793631268,
+      "done": true,
+      "usage": {
+       "completion_tokens": 215,
+       "prompt_tokens": 1230,
+       "total_tokens": 1445
+      }
+     }
+    },
+    "currentId": "0fccfcf4595ac6316ea9949711638eff"
+   },
+   "messages": [
+    {
+     "id": "147a9b0c392443b5b7f554110cd71e44",
+     "parentId": null,
+     "childrenIds": [
+      "0fccfcf4595ac6316ea9949711638eff"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nI will try to make this as short as possible. 2 years ago I had an issue with Synchrony Bank/Paypalsmartconnect. I had noticed that there were monthly payments that I had made not posted to my account. It took me numerous times to even manage to get any help from someone with this company about this issue. Every time I called, I would tell whom ever I spoke with that I had statements from my bank showing that the payments were accepted by them and where did they put the money? They would just ignore what I was telling them and say that they did n't receive the payment. After quite a few try 's, I finally got someone to help me, so I thought. We had agreed to put my account on a freeze until they could figure out what the problem was. I was sending them a package that included my payment information with the receipts from my bank stating that it was paid, etc. Within that time, there was another charge to my card that was not mine and I informed them of this and they were going to look into this too. After I sent them the package, I never heard another word from them via mail, phone, email. Not another bill or anything. Fast forward to now : I had run my credit report ( because I am applying for a mortgage ) and saw this account on there as a \" charge-off ''. I was beyond upset of course. When I called Synchrony Bank, I was told that they could n't help me and that my account was turned over to a collection agency ( XXXX ) and to call them. So I did and when talking with them, I asked why I was never notified about this collection account and they read me back all the contact information that they had for me and it was completely incorrect! So all this time they were not able to contact me concerning this debt because Synchrony Bank gave them the wrong info. So now the only way I can even talk to Synchrony about the original issue with this account and to try and straighten it out was to pay the collection agency what they wanted and then Synchrony would then have the account back and would be able to talk to me. I was also advised that I could not dispute this case if I wanted to get approved for the mortgage that I was trying to get, so of course I paid the fee that the collection agency wanted because I did n't have a choice. When I was able to talk to someone at the bank, they were not very helpful with the remaining problem and with the current issue of how they were going to clear this up with my credit since they were the ones at fault. It was like they had all previous conversations completely wiped out of their system. I was basically told that I was out of luck! So now my question is, what do I do next? I still have some of the information showing some payments that were never posted to my account ( it was originally XXXX, but I only have XXXX proof of payments at the moment ). If this was all taken care of when they said they were going to, the balance that I just paid would have been less than half ( no late fees, etc. ) and this would be an issue on my credit report. Which of course is keeping me from getting a loan! I have several complaints about this banking institution. Something must be done.\n\"\"\"",
+     "timestamp": 1793631252,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "0fccfcf4595ac6316ea9949711638eff",
+     "parentId": "147a9b0c392443b5b7f554110cd71e44",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer had issues with Synchrony Bank/Paypal, payments not posted, incorrect contact info, and a charge-off on their credit report.\",\n  \"stated_facts\": [\n    \"Customer had monthly payments not posted to their account 2 years ago\",\n    \"Customer had to send a package with payment information and receipts to Synchrony Bank\",\n    \"Customer was told their account was turned over to a collection agency with incorrect contact info\",\n    \"Customer paid the collection agency to resolve the issue and clear their credit\",\n    \"Customer still has some proof of payments that were never posted\"\n  ],\n  \"unknowns\": [\n    \"Amount of payments not posted\",\n    \"Total amount paid to the collection agency\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Possible dispute about a fee and incorrect contact info, but no clear indication of fraud or security issue.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1793631268,
+     "done": true,
+     "usage": {
+      "completion_tokens": 215,
+      "prompt_tokens": 1230,
+      "total_tokens": 1445
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1793631252000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1793631252,
+  "updated_at": 1793631268,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ },
+ {
+  "id": "11ac14fc2fe27caed6ea315d3ab70d3a",
+  "title": "A8 DGX live 20261102T145412Z | DEV-06595 (1610290) | canary | layer fraud_floor_held (19.77 s; imported API log, raw reply, commit 6c5db1b)",
+  "chat": {
+   "id": "11ac14fc2fe27caed6ea315d3ab70d3a",
+   "title": "A8 DGX live 20261102T145412Z | DEV-06595 (1610290) | canary | layer fraud_floor_held (19.77 s; imported API log, raw reply, commit 6c5db1b)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nHow to choose recommended_routing. Decide by what happened to the account, not by the words used:\n1. \"Card Fraud & Security\" if the complaint says that a charge, card or account was made, used or\n   opened WITHOUT the customer's authorisation: a lost or stolen card used by someone else, an\n   account opened in the customer's name, a charge the customer says they never made or allowed,\n   or card or account details taken over by someone else.\n2. \"Card Billing Disputes\" if the customer made or allowed the transaction and disputes it: goods\n   or services not received, refund not credited, wrong amount, duplicate posting, a fee, interest,\n   a payment or a statement problem. This holds even when the customer calls the merchant or the\n   bank a \"scam\" or a \"fraud\", or says money was \"stolen\".\n3. If the complaint does not say whether the transaction was authorised, choose\n   \"Card Billing Disputes\", set human_review_required to true and add the missing fact to \"unknowns\".\n\nHow to set human_review_required:\n- true if the complaint itself shows a possible fraud or security problem, a legal or regulatory\n  claim (a statute, bankruptcy, an attorney, a lawsuit, \"illegal\"), a dispute about a fee, or too\n  little information to choose the routing.\n- false otherwise. A customer who is upset, or who might dispute the outcome later, is not by\n  itself a reason for review.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": "0",
+    "seed": "42"
+   },
+   "history": {
+    "messages": {
+     "b77932bfdda793ebb09c4171d331366c": {
+      "id": "b77932bfdda793ebb09c4171d331366c",
+      "parentId": null,
+      "childrenIds": [
+       "a1f98acc3a2821c9a92330bcd1dccb91"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nI returned to the XXXX several years ago after being out XXXX working for several years and finally checked my credit report and found I had a Charge-Off from Synchrony/JCPenney from a credit card that had been opened while I was out of the country working I tried calling Synchrony many, many times trying to get information and report it as a fraudulent account and was told by their customer service employees that they had no information to give me and that the account was originally serviced by GE Money and they never received anything from them whey they took over the account? They told me that I had to contact the Collection agency XXXX XXXX and that if there was any paperwork to \" Validate the Debt '' they would have it. I started sending Debt Validation letters to both Synchrony and XXXX XXXX in XXXX of this year ( 2015 XXXX and neither company responded as required by U.S Federal law? Finally when I hired an attorney to sue XXXX for failure to validate the debt and for illegally reporting false information to the credit reporting agencies they immediately contacted me and notified me that they indeed did not have the information to Validate the Debt and that I was no longer responsible for the debt and they would contact all XXXX credit reporting agencies and remove the false information. Synchrony on the other hand is the worst company I have ever had to deal with in my entire life they are continuing to report the debt even though they can not even validate it and they have yet to respond to even XXXX XXXX XXXX XXXX of my debt validation letters and they do not care that they have no records to back up their claims and yet they continue to illegally report false and negative information they will not even give me any information how to contact their legal department to serve them for lawsuit its pretty bad that this country lets crooked companies like Synchrony operate and it is really sad that you have to resort to hiring an attorney. I want them to comply with U.S Federal Law and provide me with the information they are required to by law ( Validate the Debt ) immediately and or remove the false account from my credit reports. This has gone on far to long and I am paying much higher interest rates on all my credit accounts because of their illegal reporting.\n\"\"\"",
+      "timestamp": 1793631268,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "a1f98acc3a2821c9a92330bcd1dccb91": {
+      "id": "a1f98acc3a2821c9a92330bcd1dccb91",
+      "parentId": "b77932bfdda793ebb09c4171d331366c",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer disputes a Charge-Off on their credit report from Synchrony/JCPenney, claims it's a fraudulent account opened while they were out of the country, and alleges Synchrony is not complying with U.S. Federal law.\",\n  \"stated_facts\": [\n    \"Customer returned to the country after several years and found a Charge-Off on their credit report\",\n    \"Account was opened while they were out of the country\",\n    \"Customer tried calling Synchrony multiple times but was told they had no information\",\n    \"Customer sent debt validation letters to Synchrony and the collection agency but received no response\",\n    \"Customer hired an attorney and Synchrony notified them they couldn't validate the debt and removed it from credit reports\",\n    \"Synchrony is still reporting the debt despite not being able to validate it\"\n  ],\n  \"unknowns\": [\n    \"Whether the customer actually opened the account or not\",\n    \"Whether the customer authorized the account to be opened while they were out of the country\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Possible dispute about a fee (interest rates) and too little information to choose the routing.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1793631288,
+      "done": true,
+      "usage": {
+       "completion_tokens": 277,
+       "prompt_tokens": 1003,
+       "total_tokens": 1280
+      }
+     }
+    },
+    "currentId": "a1f98acc3a2821c9a92330bcd1dccb91"
+   },
+   "messages": [
+    {
+     "id": "b77932bfdda793ebb09c4171d331366c",
+     "parentId": null,
+     "childrenIds": [
+      "a1f98acc3a2821c9a92330bcd1dccb91"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nI returned to the XXXX several years ago after being out XXXX working for several years and finally checked my credit report and found I had a Charge-Off from Synchrony/JCPenney from a credit card that had been opened while I was out of the country working I tried calling Synchrony many, many times trying to get information and report it as a fraudulent account and was told by their customer service employees that they had no information to give me and that the account was originally serviced by GE Money and they never received anything from them whey they took over the account? They told me that I had to contact the Collection agency XXXX XXXX and that if there was any paperwork to \" Validate the Debt '' they would have it. I started sending Debt Validation letters to both Synchrony and XXXX XXXX in XXXX of this year ( 2015 XXXX and neither company responded as required by U.S Federal law? Finally when I hired an attorney to sue XXXX for failure to validate the debt and for illegally reporting false information to the credit reporting agencies they immediately contacted me and notified me that they indeed did not have the information to Validate the Debt and that I was no longer responsible for the debt and they would contact all XXXX credit reporting agencies and remove the false information. Synchrony on the other hand is the worst company I have ever had to deal with in my entire life they are continuing to report the debt even though they can not even validate it and they have yet to respond to even XXXX XXXX XXXX XXXX of my debt validation letters and they do not care that they have no records to back up their claims and yet they continue to illegally report false and negative information they will not even give me any information how to contact their legal department to serve them for lawsuit its pretty bad that this country lets crooked companies like Synchrony operate and it is really sad that you have to resort to hiring an attorney. I want them to comply with U.S Federal Law and provide me with the information they are required to by law ( Validate the Debt ) immediately and or remove the false account from my credit reports. This has gone on far to long and I am paying much higher interest rates on all my credit accounts because of their illegal reporting.\n\"\"\"",
+     "timestamp": 1793631268,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "a1f98acc3a2821c9a92330bcd1dccb91",
+     "parentId": "b77932bfdda793ebb09c4171d331366c",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer disputes a Charge-Off on their credit report from Synchrony/JCPenney, claims it's a fraudulent account opened while they were out of the country, and alleges Synchrony is not complying with U.S. Federal law.\",\n  \"stated_facts\": [\n    \"Customer returned to the country after several years and found a Charge-Off on their credit report\",\n    \"Account was opened while they were out of the country\",\n    \"Customer tried calling Synchrony multiple times but was told they had no information\",\n    \"Customer sent debt validation letters to Synchrony and the collection agency but received no response\",\n    \"Customer hired an attorney and Synchrony notified them they couldn't validate the debt and removed it from credit reports\",\n    \"Synchrony is still reporting the debt despite not being able to validate it\"\n  ],\n  \"unknowns\": [\n    \"Whether the customer actually opened the account or not\",\n    \"Whether the customer authorized the account to be opened while they were out of the country\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Possible dispute about a fee (interest rates) and too little information to choose the routing.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1793631288,
+     "done": true,
+     "usage": {
+      "completion_tokens": 277,
+      "prompt_tokens": 1003,
+      "total_tokens": 1280
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1793631268000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1793631268,
+  "updated_at": 1793631288,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ },
+ {
+  "id": "0c80576b98ceadb9367e4776d7ee66d7",
+  "title": "A8 DGX live 20261102T145412Z | DEV-02570 (1864882) | real proposal | layer fraud_floor_held (13.61 s; imported API log, raw reply, commit 6c5db1b)",
+  "chat": {
+   "id": "0c80576b98ceadb9367e4776d7ee66d7",
+   "title": "A8 DGX live 20261102T145412Z | DEV-02570 (1864882) | real proposal | layer fraud_floor_held (13.61 s; imported API log, raw reply, commit 6c5db1b)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nHow to choose recommended_routing. Decide by what happened to the account, not by the words used:\n1. \"Card Fraud & Security\" if the complaint says that a charge, card or account was made, used or\n   opened WITHOUT the customer's authorisation: a lost or stolen card used by someone else, an\n   account opened in the customer's name, a charge the customer says they never made or allowed,\n   or card or account details taken over by someone else.\n2. \"Card Billing Disputes\" if the customer made or allowed the transaction and disputes it: goods\n   or services not received, refund not credited, wrong amount, duplicate posting, a fee, interest,\n   a payment or a statement problem. This holds even when the customer calls the merchant or the\n   bank a \"scam\" or a \"fraud\", or says money was \"stolen\".\n3. If the complaint does not say whether the transaction was authorised, choose\n   \"Card Billing Disputes\", set human_review_required to true and add the missing fact to \"unknowns\".\n\nHow to set human_review_required:\n- true if the complaint itself shows a possible fraud or security problem, a legal or regulatory\n  claim (a statute, bankruptcy, an attorney, a lawsuit, \"illegal\"), a dispute about a fee, or too\n  little information to choose the routing.\n- false otherwise. A customer who is upset, or who might dispute the outcome later, is not by\n  itself a reason for review.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": "0",
+    "seed": "42"
+   },
+   "history": {
+    "messages": {
+     "76e073ca7241ab69bf686f5f9838ff83": {
+      "id": "76e073ca7241ab69bf686f5f9838ff83",
+      "parentId": null,
+      "childrenIds": [
+       "1323a9366d76888583236a92ae5a174e"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nIn XXXX 2015 I opened a credit card account through XXXX XXXX with Synchrony Financial. I immediately charged {$3000.00}. XXXX XXXX has continued to place charges on my account without my knowledge and Synchrony Bank is accepting these charges that put my account OVER and above the credit limit I was approved for. This has happened more than 2 times and the last was for a charge of {$2200.00} of which I had no idea about until I got the credit card statement in the mail. Separately I have contacted XXXX XXXX regarding the validity of this charge ( and replacement for a defective furniture received ). I can not understand why Synchrony would approve these charges that are over and above my approved credit limit ( which is {$9700.00} ). When I called Synchrony to report the unauthorized / fraudulent charge of {$2200.00} I asked to speak to a Supervisor. She was extremely rude and said \" we can not control fraudulent charges made on a credit card ''. She refused to acknowledge that they could say NO when a charge is over and above the approved credit limit. I immediately requested my account be closed to further charges. They have since transferred that outstanding balance to a new account # and provided me with a new card ( for the new account of which I have no intention of activating ). My concern is that this amount that exceeds my credit limit is reported to the credit bureaus and will bring my credit scores down significantly since XXXX % of your sores is the ratio between your balance versus the limit. I do n't feel they are taking this issue seriously and while I have filed a fraudulent complaint regarding the {$2200.00} I am very concerned with their practices which allows XXXX XXXX to charge anything they want to a consumer credit card with no protection or consideration to consumers best interest.\n\"\"\"",
+      "timestamp": 1793631287,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "1323a9366d76888583236a92ae5a174e": {
+      "id": "1323a9366d76888583236a92ae5a174e",
+      "parentId": "76e073ca7241ab69bf686f5f9838ff83",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer's account was charged over the approved credit limit without their knowledge, and they dispute the charges. They also experienced poor customer service from Synchrony Bank.\",\n  \"stated_facts\": [\n    \"Account was charged over the approved credit limit\",\n    \"Customer disputes the charges\",\n    \"Customer contacted the merchant regarding the validity of the charge\",\n    \"Customer experienced poor customer service from Synchrony Bank\"\n  ],\n  \"unknowns\": [\n    \"Whether the customer's account was compromised or if the merchant made an error\",\n    \"Whether the customer has already disputed the charges with Synchrony Bank\"\n  ],\n  \"fraud_or_security_concern\": true,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Possible unauthorized charges and poor customer service. Missing information on account compromise and previous disputes.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1793631301,
+      "done": true,
+      "usage": {
+       "completion_tokens": 190,
+       "prompt_tokens": 924,
+       "total_tokens": 1114
+      }
+     }
+    },
+    "currentId": "1323a9366d76888583236a92ae5a174e"
+   },
+   "messages": [
+    {
+     "id": "76e073ca7241ab69bf686f5f9838ff83",
+     "parentId": null,
+     "childrenIds": [
+      "1323a9366d76888583236a92ae5a174e"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nIn XXXX 2015 I opened a credit card account through XXXX XXXX with Synchrony Financial. I immediately charged {$3000.00}. XXXX XXXX has continued to place charges on my account without my knowledge and Synchrony Bank is accepting these charges that put my account OVER and above the credit limit I was approved for. This has happened more than 2 times and the last was for a charge of {$2200.00} of which I had no idea about until I got the credit card statement in the mail. Separately I have contacted XXXX XXXX regarding the validity of this charge ( and replacement for a defective furniture received ). I can not understand why Synchrony would approve these charges that are over and above my approved credit limit ( which is {$9700.00} ). When I called Synchrony to report the unauthorized / fraudulent charge of {$2200.00} I asked to speak to a Supervisor. She was extremely rude and said \" we can not control fraudulent charges made on a credit card ''. She refused to acknowledge that they could say NO when a charge is over and above the approved credit limit. I immediately requested my account be closed to further charges. They have since transferred that outstanding balance to a new account # and provided me with a new card ( for the new account of which I have no intention of activating ). My concern is that this amount that exceeds my credit limit is reported to the credit bureaus and will bring my credit scores down significantly since XXXX % of your sores is the ratio between your balance versus the limit. I do n't feel they are taking this issue seriously and while I have filed a fraudulent complaint regarding the {$2200.00} I am very concerned with their practices which allows XXXX XXXX to charge anything they want to a consumer credit card with no protection or consideration to consumers best interest.\n\"\"\"",
+     "timestamp": 1793631287,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "1323a9366d76888583236a92ae5a174e",
+     "parentId": "76e073ca7241ab69bf686f5f9838ff83",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer's account was charged over the approved credit limit without their knowledge, and they dispute the charges. They also experienced poor customer service from Synchrony Bank.\",\n  \"stated_facts\": [\n    \"Account was charged over the approved credit limit\",\n    \"Customer disputes the charges\",\n    \"Customer contacted the merchant regarding the validity of the charge\",\n    \"Customer experienced poor customer service from Synchrony Bank\"\n  ],\n  \"unknowns\": [\n    \"Whether the customer's account was compromised or if the merchant made an error\",\n    \"Whether the customer has already disputed the charges with Synchrony Bank\"\n  ],\n  \"fraud_or_security_concern\": true,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Possible unauthorized charges and poor customer service. Missing information on account compromise and previous disputes.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1793631301,
+     "done": true,
+     "usage": {
+      "completion_tokens": 190,
+      "prompt_tokens": 924,
+      "total_tokens": 1114
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1793631287000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1793631287,
+  "updated_at": 1793631301,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ },
+ {
+  "id": "7540d76e376e018231d88798a507f213",
+  "title": "A8 DGX live 20261102T145412Z | DEV-03714 (2305999) | real proposal | layer fraud_floor_held (10.77 s; imported API log, raw reply, commit 6c5db1b)",
+  "chat": {
+   "id": "7540d76e376e018231d88798a507f213",
+   "title": "A8 DGX live 20261102T145412Z | DEV-03714 (2305999) | real proposal | layer fraud_floor_held (10.77 s; imported API log, raw reply, commit 6c5db1b)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nHow to choose recommended_routing. Decide by what happened to the account, not by the words used:\n1. \"Card Fraud & Security\" if the complaint says that a charge, card or account was made, used or\n   opened WITHOUT the customer's authorisation: a lost or stolen card used by someone else, an\n   account opened in the customer's name, a charge the customer says they never made or allowed,\n   or card or account details taken over by someone else.\n2. \"Card Billing Disputes\" if the customer made or allowed the transaction and disputes it: goods\n   or services not received, refund not credited, wrong amount, duplicate posting, a fee, interest,\n   a payment or a statement problem. This holds even when the customer calls the merchant or the\n   bank a \"scam\" or a \"fraud\", or says money was \"stolen\".\n3. If the complaint does not say whether the transaction was authorised, choose\n   \"Card Billing Disputes\", set human_review_required to true and add the missing fact to \"unknowns\".\n\nHow to set human_review_required:\n- true if the complaint itself shows a possible fraud or security problem, a legal or regulatory\n  claim (a statute, bankruptcy, an attorney, a lawsuit, \"illegal\"), a dispute about a fee, or too\n  little information to choose the routing.\n- false otherwise. A customer who is upset, or who might dispute the outcome later, is not by\n  itself a reason for review.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": "0",
+    "seed": "42"
+   },
+   "history": {
+    "messages": {
+     "ac8088d7deb21fcfa32bcda39514f251": {
+      "id": "ac8088d7deb21fcfa32bcda39514f251",
+      "parentId": null,
+      "childrenIds": [
+       "bdf5deae9ab9426a140d9d14017b8d42"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nXXXX acct has XXXX insurance and they refuse to activate the insurance on the acct they prefer to go to a colledction agency which is fraud! GO AFTER THEM AND GET THEM TO ACTIVAE THE INSURANCE AS I AM XXXX\n\"\"\"",
+      "timestamp": 1793631301,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "bdf5deae9ab9426a140d9d14017b8d42": {
+      "id": "bdf5deae9ab9426a140d9d14017b8d42",
+      "parentId": "ac8088d7deb21fcfa32bcda39514f251",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer claims XXXX insurance company is refusing to activate insurance on their account and is considering going to a collection agency, calling it 'fraud'.\",\n  \"stated_facts\": [\"XXXX insurance company is refusing to activate insurance\", \"Customer is considering going to a collection agency\"],\n  \"unknowns\": [\"Whether the customer has already contacted the insurance company\", \"Whether the customer has tried to resolve the issue with the insurance company\"],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer disputes insurance company's actions, but no indication of unauthorized transaction or security issue.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1793631312,
+      "done": true,
+      "usage": {
+       "completion_tokens": 151,
+       "prompt_tokens": 592,
+       "total_tokens": 743
+      }
+     }
+    },
+    "currentId": "bdf5deae9ab9426a140d9d14017b8d42"
+   },
+   "messages": [
+    {
+     "id": "ac8088d7deb21fcfa32bcda39514f251",
+     "parentId": null,
+     "childrenIds": [
+      "bdf5deae9ab9426a140d9d14017b8d42"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nXXXX acct has XXXX insurance and they refuse to activate the insurance on the acct they prefer to go to a colledction agency which is fraud! GO AFTER THEM AND GET THEM TO ACTIVAE THE INSURANCE AS I AM XXXX\n\"\"\"",
+     "timestamp": 1793631301,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "bdf5deae9ab9426a140d9d14017b8d42",
+     "parentId": "ac8088d7deb21fcfa32bcda39514f251",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer claims XXXX insurance company is refusing to activate insurance on their account and is considering going to a collection agency, calling it 'fraud'.\",\n  \"stated_facts\": [\"XXXX insurance company is refusing to activate insurance\", \"Customer is considering going to a collection agency\"],\n  \"unknowns\": [\"Whether the customer has already contacted the insurance company\", \"Whether the customer has tried to resolve the issue with the insurance company\"],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Customer disputes insurance company's actions, but no indication of unauthorized transaction or security issue.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1793631312,
+     "done": true,
+     "usage": {
+      "completion_tokens": 151,
+      "prompt_tokens": 592,
+      "total_tokens": 743
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1793631301000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1793631301,
+  "updated_at": 1793631312,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ },
+ {
+  "id": "857d68b776464ea5bbb0a9e8fb837958",
+  "title": "A8 DGX live 20261102T145412Z | DEV-07139 (1640901) | real proposal | layer fraud_floor_held (13.9 s; imported API log, raw reply, commit 6c5db1b)",
+  "chat": {
+   "id": "857d68b776464ea5bbb0a9e8fb837958",
+   "title": "A8 DGX live 20261102T145412Z | DEV-07139 (1640901) | real proposal | layer fraud_floor_held (13.9 s; imported API log, raw reply, commit 6c5db1b)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nHow to choose recommended_routing. Decide by what happened to the account, not by the words used:\n1. \"Card Fraud & Security\" if the complaint says that a charge, card or account was made, used or\n   opened WITHOUT the customer's authorisation: a lost or stolen card used by someone else, an\n   account opened in the customer's name, a charge the customer says they never made or allowed,\n   or card or account details taken over by someone else.\n2. \"Card Billing Disputes\" if the customer made or allowed the transaction and disputes it: goods\n   or services not received, refund not credited, wrong amount, duplicate posting, a fee, interest,\n   a payment or a statement problem. This holds even when the customer calls the merchant or the\n   bank a \"scam\" or a \"fraud\", or says money was \"stolen\".\n3. If the complaint does not say whether the transaction was authorised, choose\n   \"Card Billing Disputes\", set human_review_required to true and add the missing fact to \"unknowns\".\n\nHow to set human_review_required:\n- true if the complaint itself shows a possible fraud or security problem, a legal or regulatory\n  claim (a statute, bankruptcy, an attorney, a lawsuit, \"illegal\"), a dispute about a fee, or too\n  little information to choose the routing.\n- false otherwise. A customer who is upset, or who might dispute the outcome later, is not by\n  itself a reason for review.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": "0",
+    "seed": "42"
+   },
+   "history": {
+    "messages": {
+     "f3f5f200d83582d486d6e1fc255defb7": {
+      "id": "f3f5f200d83582d486d6e1fc255defb7",
+      "parentId": null,
+      "childrenIds": [
+       "30b16ec2bd9fca9e14bdc55c6c286c77"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nI disputed a charge on my US Bank credit card. US Bank acknowledged the dispute, notified me of the temporary reversal of the charges, and credited my account for the disputed amount. During the review of the dispute, US Bank allowed the vendor ( s ) to continue to charge my account new charges. I received letters from US Bank stating \" We have concluded our investigation and the case was found in your favor. The provisional credit we issued to your account is now permanent. '' Now US Bank is reinforcing the fraudulent activity and placed these charges back on my account. Now they have racked up an unbelievable amount in interest and late fees along with the fraudulent charges. Do not get a credit card through US Bank, huge disappointment.\n\"\"\"",
+      "timestamp": 1793631312,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "30b16ec2bd9fca9e14bdc55c6c286c77": {
+      "id": "30b16ec2bd9fca9e14bdc55c6c286c77",
+      "parentId": "f3f5f200d83582d486d6e1fc255defb7",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"US Bank customer disputes a charge, claims bank allowed vendor to continue charging and then reinstated those charges, resulting in additional interest and fees.\",\n  \"stated_facts\": [\n    \"US Bank acknowledged the dispute and temporarily reversed the charges\",\n    \"US Bank allowed the vendor to continue charging the account during the dispute review\",\n    \"US Bank reinstated the previously removed charges\",\n    \"Additional interest and fees were added to the account\"\n  ],\n  \"unknowns\": [\n    \"The original charge that was disputed\",\n    \"The vendor's identity\",\n    \"The exact amount of the additional interest and fees\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Possible error in US Bank's handling of the dispute, requiring review to determine the cause and correct the outcome.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1793631326,
+      "done": true,
+      "usage": {
+       "completion_tokens": 195,
+       "prompt_tokens": 686,
+       "total_tokens": 881
+      }
+     }
+    },
+    "currentId": "30b16ec2bd9fca9e14bdc55c6c286c77"
+   },
+   "messages": [
+    {
+     "id": "f3f5f200d83582d486d6e1fc255defb7",
+     "parentId": null,
+     "childrenIds": [
+      "30b16ec2bd9fca9e14bdc55c6c286c77"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nI disputed a charge on my US Bank credit card. US Bank acknowledged the dispute, notified me of the temporary reversal of the charges, and credited my account for the disputed amount. During the review of the dispute, US Bank allowed the vendor ( s ) to continue to charge my account new charges. I received letters from US Bank stating \" We have concluded our investigation and the case was found in your favor. The provisional credit we issued to your account is now permanent. '' Now US Bank is reinforcing the fraudulent activity and placed these charges back on my account. Now they have racked up an unbelievable amount in interest and late fees along with the fraudulent charges. Do not get a credit card through US Bank, huge disappointment.\n\"\"\"",
+     "timestamp": 1793631312,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "30b16ec2bd9fca9e14bdc55c6c286c77",
+     "parentId": "f3f5f200d83582d486d6e1fc255defb7",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"US Bank customer disputes a charge, claims bank allowed vendor to continue charging and then reinstated those charges, resulting in additional interest and fees.\",\n  \"stated_facts\": [\n    \"US Bank acknowledged the dispute and temporarily reversed the charges\",\n    \"US Bank allowed the vendor to continue charging the account during the dispute review\",\n    \"US Bank reinstated the previously removed charges\",\n    \"Additional interest and fees were added to the account\"\n  ],\n  \"unknowns\": [\n    \"The original charge that was disputed\",\n    \"The vendor's identity\",\n    \"The exact amount of the additional interest and fees\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Possible error in US Bank's handling of the dispute, requiring review to determine the cause and correct the outcome.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1793631326,
+     "done": true,
+     "usage": {
+      "completion_tokens": 195,
+      "prompt_tokens": 686,
+      "total_tokens": 881
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1793631312000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1793631312,
+  "updated_at": 1793631326,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ },
+ {
+  "id": "b345be4909f15dddcd6990fe4938ea50",
+  "title": "A8 DGX live 20261102T145412Z | DEV-02098 (1487055) | real proposal | layer fraud_floor_held (14.22 s; imported API log, raw reply, commit 6c5db1b)",
+  "chat": {
+   "id": "b345be4909f15dddcd6990fe4938ea50",
+   "title": "A8 DGX live 20261102T145412Z | DEV-02098 (1487055) | real proposal | layer fraud_floor_held (14.22 s; imported API log, raw reply, commit 6c5db1b)",
+   "models": [
+    "llama-3.1-8b-instruct"
+   ],
+   "params": {
+    "system": "You assist a bank employee who receives credit-card billing-dispute complaints.\nYou only recommend; the employee decides.\n\nRules:\n- Use only facts stated in the complaint. Do not infer facts that are not written.\n- If information needed to handle the case is missing, list it under \"unknowns\".\n- Treat suspected fraud or duplication as a concern needing review, never as an established finding.\n\nHow to choose recommended_routing. Decide by what happened to the account, not by the words used:\n1. \"Card Fraud & Security\" if the complaint says that a charge, card or account was made, used or\n   opened WITHOUT the customer's authorisation: a lost or stolen card used by someone else, an\n   account opened in the customer's name, a charge the customer says they never made or allowed,\n   or card or account details taken over by someone else.\n2. \"Card Billing Disputes\" if the customer made or allowed the transaction and disputes it: goods\n   or services not received, refund not credited, wrong amount, duplicate posting, a fee, interest,\n   a payment or a statement problem. This holds even when the customer calls the merchant or the\n   bank a \"scam\" or a \"fraud\", or says money was \"stolen\".\n3. If the complaint does not say whether the transaction was authorised, choose\n   \"Card Billing Disputes\", set human_review_required to true and add the missing fact to \"unknowns\".\n\nHow to set human_review_required:\n- true if the complaint itself shows a possible fraud or security problem, a legal or regulatory\n  claim (a statute, bankruptcy, an attorney, a lawsuit, \"illegal\"), a dispute about a fee, or too\n  little information to choose the routing.\n- false otherwise. A customer who is upset, or who might dispute the outcome later, is not by\n  itself a reason for review.\n\nReturn ONLY one JSON object, with no other text, using exactly these keys:\n{\n  \"case_summary\": \"<= 60 words, facts stated by the customer\",\n  \"stated_facts\": [\"short fact\", \"...\"],\n  \"unknowns\": [\"missing information\", \"...\"],\n  \"fraud_or_security_concern\": true or false,\n  \"recommended_routing\": \"Card Billing Disputes\" or \"Card Fraud & Security\",\n  \"human_review_required\": true or false,\n  \"rationale\": \"<= 40 words\"\n}",
+    "temperature": "0",
+    "seed": "42"
+   },
+   "history": {
+    "messages": {
+     "75cbe0cbd23be786b4dfd82b8a8118bc": {
+      "id": "75cbe0cbd23be786b4dfd82b8a8118bc",
+      "parentId": null,
+      "childrenIds": [
+       "3d60249382a5dac42470be52b3e625fa"
+      ],
+      "role": "user",
+      "content": "Complaint:\n\"\"\"\nOrder # XXXX was supposedly delivered on or around XXXX XXXX, tracking info shows it was signed by someone who forged my signature, a copy is enclosed. XXXX XXXX was a Monday, I was not at home on this day and the signature is forged as it is not mine, not even fully signed. The signature is not my full name, you can see from the copy provided my USPS. An A-Z claim was filed with Amazon, however, it was closed a day after opening stating the item was signed for by myself and would not investigate further. A dispute was made with Amazon credit as well, however, it might have been closed as well and the reason for this complaint. The total charge for the order is XXXX, please advise Synchrony Bank I need this item disputed and or refunded, if possible.\n\"\"\"",
+      "timestamp": 1793631325,
+      "models": [
+       "llama-3.1-8b-instruct"
+      ]
+     },
+     "3d60249382a5dac42470be52b3e625fa": {
+      "id": "3d60249382a5dac42470be52b3e625fa",
+      "parentId": "75cbe0cbd23be786b4dfd82b8a8118bc",
+      "childrenIds": [],
+      "role": "assistant",
+      "content": "{\n  \"case_summary\": \"Customer disputes delivery of order #XXXX, claims signature on tracking info is forged, and Amazon dispute was closed without investigation.\",\n  \"stated_facts\": [\n    \"Order #XXXX was supposedly delivered on or around XXXX XXXX\",\n    \"Tracking info shows signature was forged\",\n    \"Signature is not the customer's full name\",\n    \"Customer was not at home on the delivery day\",\n    \"Amazon dispute was closed without investigation\",\n    \"Total charge for the order is XXXX\"\n  ],\n  \"unknowns\": [\n    \"Copy of USPS signature provided\",\n    \"Amazon dispute status (open or closed)\",\n    \"Order #XXXX and delivery date details\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Possible dispute about goods not received, with insufficient information to determine the outcome.\"\n}",
+      "model": "llama-3.1-8b-instruct",
+      "modelName": "llama-3.1-8b-instruct",
+      "timestamp": 1793631340,
+      "done": true,
+      "usage": {
+       "completion_tokens": 199,
+       "prompt_tokens": 711,
+       "total_tokens": 910
+      }
+     }
+    },
+    "currentId": "3d60249382a5dac42470be52b3e625fa"
+   },
+   "messages": [
+    {
+     "id": "75cbe0cbd23be786b4dfd82b8a8118bc",
+     "parentId": null,
+     "childrenIds": [
+      "3d60249382a5dac42470be52b3e625fa"
+     ],
+     "role": "user",
+     "content": "Complaint:\n\"\"\"\nOrder # XXXX was supposedly delivered on or around XXXX XXXX, tracking info shows it was signed by someone who forged my signature, a copy is enclosed. XXXX XXXX was a Monday, I was not at home on this day and the signature is forged as it is not mine, not even fully signed. The signature is not my full name, you can see from the copy provided my USPS. An A-Z claim was filed with Amazon, however, it was closed a day after opening stating the item was signed for by myself and would not investigate further. A dispute was made with Amazon credit as well, however, it might have been closed as well and the reason for this complaint. The total charge for the order is XXXX, please advise Synchrony Bank I need this item disputed and or refunded, if possible.\n\"\"\"",
+     "timestamp": 1793631325,
+     "models": [
+      "llama-3.1-8b-instruct"
+     ]
+    },
+    {
+     "id": "3d60249382a5dac42470be52b3e625fa",
+     "parentId": "75cbe0cbd23be786b4dfd82b8a8118bc",
+     "childrenIds": [],
+     "role": "assistant",
+     "content": "{\n  \"case_summary\": \"Customer disputes delivery of order #XXXX, claims signature on tracking info is forged, and Amazon dispute was closed without investigation.\",\n  \"stated_facts\": [\n    \"Order #XXXX was supposedly delivered on or around XXXX XXXX\",\n    \"Tracking info shows signature was forged\",\n    \"Signature is not the customer's full name\",\n    \"Customer was not at home on the delivery day\",\n    \"Amazon dispute was closed without investigation\",\n    \"Total charge for the order is XXXX\"\n  ],\n  \"unknowns\": [\n    \"Copy of USPS signature provided\",\n    \"Amazon dispute status (open or closed)\",\n    \"Order #XXXX and delivery date details\"\n  ],\n  \"fraud_or_security_concern\": false,\n  \"recommended_routing\": \"Card Billing Disputes\",\n  \"human_review_required\": true,\n  \"rationale\": \"Possible dispute about goods not received, with insufficient information to determine the outcome.\"\n}",
+     "model": "llama-3.1-8b-instruct",
+     "modelName": "llama-3.1-8b-instruct",
+     "timestamp": 1793631340,
+     "done": true,
+     "usage": {
+      "completion_tokens": 199,
+      "prompt_tokens": 711,
+      "total_tokens": 910
+     }
+    }
+   ],
+   "tags": [],
+   "timestamp": 1793631325000
+  },
+  "meta": {
+   "tags": []
+  },
+  "created_at": 1793631325,
+  "updated_at": 1793631340,
+  "archived": false,
+  "pinned": false,
+  "share_id": null,
+  "folder_id": null
+ }
+]

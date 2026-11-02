@@ -40,6 +40,7 @@ class Base(unittest.TestCase):
 
     def accept(self, p, rid="rev1", **kw):
         kw.setdefault("dwell_s", 90)
+        kw.setdefault("full_text_shown", True)
         return self.ctl.record_decision(p, rid, BILL, reason_code=CODE, attest=True, **kw)
 
     def decline(self, p, rid="rev1"):
@@ -72,7 +73,8 @@ class Suspension(Base):
         agree = a7.decide("A stolen card was used for three charges.", case_id="X",
                           model_text=reply(FRAUD, True), now="t")
         with self.assertRaises(c.ControlRefusal):
-            self.ctl.record_decision(agree, "rev1", BILL, reason_code=CODE, attest=True)
+            self.ctl.record_decision(agree, "rev1", BILL, reason_code=CODE, attest=True,
+                                     full_text_shown=True)
 
     def test_careful_reviewer_is_never_suspended(self):
         for p in self.real[:10]:
@@ -146,13 +148,24 @@ class LeadingIndicatorsAndPrevention(Base):
         ev = [e for e in self.ctl.events if e["event"] == "reviewer_watch"][0]
         self.assertEqual(ev["spot_check"], ["S001", "S002", "S003", "S004", "S005"])
 
-    def test_watch_without_canary_left_needs_second_reviewer(self):
-        for p in self.real[:5]:
-            self.accept(p, dwell_s=5)
+    def test_pool_used_up_needs_second_person_even_for_active_reviewer(self):
         self.ctl.set_supply("rev1", False)
+        self.assertEqual(self.ctl.status("rev1"), c.ACTIVE)
+        with self.assertRaises(c.ControlRefusal) as cm:
+            self.accept(self.real[0])
+        self.assertEqual(cm.exception.reason, "two_person_required")
         with self.assertRaises(c.ControlRefusal):
-            self.accept(self.real[5])
-        self.decline(self.real[6])
+            self.accept(self.real[0], approved_by="rev1")            # not oneself
+        rec = self.accept(self.real[0], approved_by="rev2")
+        self.assertEqual(rec["second_approver"], "rev2")
+        self.decline(self.real[1])                                 # staying in Fraud needs no one
+
+    def test_suspended_person_cannot_be_second_approver(self):
+        self.accept(self.can, rid="rev2")                          # rev2 suspended
+        self.ctl.set_supply("rev1", False)
+        with self.assertRaises(c.ControlRefusal) as cm:
+            self.accept(self.real[0], approved_by="rev2")
+        self.assertEqual(cm.exception.reason, "invalid_second_approver")
 
     def test_passing_a_canary_clears_watch(self):
         for p in self.real[:5]:
@@ -165,11 +178,18 @@ class LeadingIndicatorsAndPrevention(Base):
             self.accept(self.real[0], full_text_shown=False)
         self.decline(self.real[1])                       # staying in Fraud is always allowed
 
+    def test_full_text_must_be_confirmed_explicitly(self):
+        with self.assertRaises(c.ControlRefusal) as cm:   # caller forgot the argument
+            self.ctl.record_decision(self.real[0], "rev1", BILL, reason_code=CODE, attest=True)
+        self.assertEqual(cm.exception.reason, "full_text_not_confirmed")
+
     def test_a7_rules_still_apply_through_the_control(self):
         with self.assertRaises(a7.AuthorityError):
-            self.ctl.record_decision(self.real[0], "rev1", BILL, reason_code="other", attest=True)
+            self.ctl.record_decision(self.real[0], "rev1", BILL, reason_code="other", attest=True,
+                                     full_text_shown=True)
         with self.assertRaises(a7.AuthorityError):
-            self.ctl.record_decision(self.real[0], "rev1", BILL, reason_code=CODE, attest=False)
+            self.ctl.record_decision(self.real[0], "rev1", BILL, reason_code=CODE, attest=False,
+                                     full_text_shown=True)
 
 
 class QueueQualificationAndStop(Base):
@@ -181,6 +201,27 @@ class QueueQualificationAndStop(Base):
         self.assertLess(first, c.CANARY_EVERY)
         self.assertEqual(set(items[first][0]), set(self.real[0]))   # same keys: nothing marks it
         self.assertNotIn("canary", json.dumps(items[first][0]))
+
+    def test_last_canary_is_still_tested_and_supply_ends_after_it(self):
+        q = c.ReviewQueue(self.real[:12], [self.can], self.ctl, "rev1", random.Random(3))
+        seen_canary = False
+        for pk, is_canary in q:
+            if is_canary:
+                self.assertTrue(self.ctl.supply["rev1"])          # the canary itself can be failed
+                self.accept(pk)
+                seen_canary = True
+                break
+        self.assertTrue(seen_canary)
+        self.assertEqual(self.ctl.status("rev1"), c.SUSPENDED)
+
+    def test_supply_ends_when_next_real_item_is_served(self):
+        q = c.ReviewQueue(self.real[:12], [self.can], self.ctl, "rev1", random.Random(3))
+        after = False
+        for pk, is_canary in q:
+            if after:
+                self.assertFalse(self.ctl.supply["rev1"])
+                break
+            after = is_canary
 
     def test_qualify_drops_canary_the_model_no_longer_proposes(self):
         agree = a7.decide("The thief used my stolen card.", case_id="Q", model_text=reply(FRAUD, True), now="t")
@@ -196,6 +237,19 @@ class QueueQualificationAndStop(Base):
         self.accept(self.can, rid="a")
         self.accept(self.can, rid="b")
         self.assertFalse(self.ctl.system_status()["proposals_allowed"])
+
+    def test_feature_stop_is_enforced_at_view_and_decision(self):
+        self.assertTrue(self.ctl.view(self.real[0], "rev3")["show_proposal"])
+        self.accept(self.can, rid="a")
+        self.accept(self.can, rid="b")                   # stop: 2 reviewers suspended
+        v = self.ctl.view(self.real[0], "rev3")
+        self.assertFalse(v["show_proposal"])
+        self.assertIn("proposal_withheld", [e["event"] for e in self.ctl.events])
+        with self.assertRaises(c.ControlRefusal) as cm:  # direct call to the decision entry
+            self.accept(self.real[0], rid="rev3")
+        self.assertEqual(cm.exception.reason, "two_person_required")
+        self.accept(self.real[0], rid="rev3", approved_by="rev4")
+        self.decline(self.real[1], rid="rev3")
 
     def test_audit_log_has_events_and_no_narrative(self):
         with tempfile.TemporaryDirectory() as d:

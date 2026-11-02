@@ -4,64 +4,59 @@
 
 Candidate contribution by Mingyu He for Team Exercise 8 (controlled prototype). **Not merged.** Built on
 `mingyu/a7-authority-layer`; it wraps `a7_authority.apply_employee_decision` and never weakens an A7 rule.
-It contains no team code: the TE8 integration point in the team app is one call (below).
+It contains no team code. Control version `a8-reviewer-control-v2` (the commit after `090ad8a`); v1 = `021f070`–`090ad8a`.
 
 **Failure it targets.** Under the TW7 policy every case reaches a named reviewer. On about 14% of in-scope
-cases the fraud floor holds a case in Card Fraud & Security while the model proposes Billing (A7 replay:
-34 of 81). A reviewer who accepts those proposals by habit moves genuine unauthorised-use cases out of Fraud &
-Security, and the audit record still looks clean: a named reviewer, a valid reason code, an attestation. On the
-A7 replay the proposal is wrong on 5 of 34 (3 Fraud & Security; 2 undecidable in the A6 audit because authorisation
-is not stated, which the floor keeps).
-On the TW7 screen (`narrative[:700]`), 27 of the 34 proposals are cut off; in DEV-07257 the only statement of
-unauthorised use starts at character 900.
+cases (stratum-weighted; 34 of the 81 oversampled A7 replay cases, i.e. 42% of the sample) the fraud floor holds a case
+in Card Fraud & Security while the model proposes Billing. A reviewer who accepts those proposals by habit moves
+genuine unauthorised-use cases out of Fraud & Security, and the audit record still looks clean: a named reviewer, a valid
+reason code, an attestation. On the A7 replay the proposal is wrong on 5 of 34 (3 Fraud & Security; 2 undecidable in the
+A6 audit because authorisation is not stated, which the floor keeps). On the TW7 screen (`narrative[:700]`), 27 of the 34
+proposals are cut off; in DEV-07257 the only statement of unauthorised use starts at character 900.
 
 | Control | In code |
 |---|---|
 | C1 Canaries | Adjudicated Fraud & Security cases on which the **live** model proposes Billing (`qualify`) are mixed into each reviewer's proposals, one per block of 10 (`ReviewQueue`). Nothing in the packet marks a canary. Pool: `config/a8_canary_pool.json` (2 cases). |
-| C2 Suspension | Accepting a canary suspends that reviewer's de-escalation authority at once; later de-escalations are refused (`ControlRefusal`) and the case stays in Fraud & Security. Declining is always allowed. |
+| C2 Suspension | Accepting a canary suspends that reviewer's de-escalation authority at once; later de-escalations are refused (`ControlRefusal`, reason `suspended`) and the case stays in Fraud & Security. Declining is always allowed. A suspension is a precaution, not a verdict: one accepted canary is one wrong de-escalation under the current reference label (DEV-06595's is single-labeller), not proof of habit. |
 | C3 Lookback | Real de-escalations since the reviewer's last passed canary are listed for a second person. |
 | C4 Resumption | `reinstate` needs a named supervisor (not the reviewer), a closed lookback and 2 canaries declined since suspension. |
-| C5 WATCH | 19 accepted proposals in a row, or median decision time < 30 s: canary rate doubled, spot-check list to the supervisor, and if no canary is left, single-reviewer de-escalation is refused. |
-| C6 Full text | De-escalation refused unless the whole complaint was on screen. |
-| C7 Feature stop | `system_status`: proposals must not be shown when no canary qualifies for the current model + prompt, 2 reviewers are suspended, or >= 25% of canaries failed (>= 4 seen). |
+| C5 WATCH | 19 accepted proposals in a row, or median decision time < 30 s: canary rate doubled and a spot-check list to the supervisor. Never a suspension on its own. |
+| C6 Full text | De-escalation refused unless the caller passes `full_text_shown=True` explicitly; omitted or `False` refuses. |
+| C7 Untested → two people | When no canary is left to test a reviewer (their pool used up, or none qualified), **any** reviewer's de-escalation needs `approved_by` = a second named, non-suspended person (reason `two_person_required`). |
+| C8 Feature stop, enforced | When no canary qualifies for the current model + prompt, 2 reviewers are suspended, or >= 25% of canaries failed (>= 4 seen): `view()` withholds the model proposal from the screen and `record_decision()` refuses single-reviewer de-escalation, until the owner resumes. |
 
 ```bash
 git checkout mingyu/a8-reviewer-control
-python -m unittest discover -s tests -v                       # 92 offline tests (69 A4–A7 + 23 A8)
+python -m unittest discover -s tests -v                       # 98 offline tests (69 A4–A7 + 29 A8)
 python -m src.a8_reviewer_control math                        # canary vs acceptance-streak arithmetic
 python -m src.a8_reviewer_control drill --adjudicated data/adjudication/p3_adjudicated_labels.csv data/a6_audit_labels.csv
 python -m src.a8_reviewer_control drill --live --timeout 180 --live-ids DEV-07257 DEV-06595 DEV-02570 DEV-03714 DEV-07139 DEV-02098 \
        --adjudicated ...                                      # DGX: NYU network + .env token (omit --live-ids for all 34)
+python -m src.a8_reviewer_control export-openwebui runs/<run_id>_a8_drill_live.jsonl   # Open WebUI chat import
 ```
 
-`drill` re-derives the 34 proposal cases from the logged A6 replies, (live mode) calls the model on each,
+`drill` re-derives the 34 proposal cases from the logged A6 replies, (live mode) calls the model on the chosen cases,
 qualifies the canaries, and runs three **simulated** reviewers (careful, rubber-stamp, late-onset rubber-stamp)
 through the same queue with the control off (A7/TW7 as built) and on, for one printed seed and 1,000 random
-orders. Simulated reviewers test the control's mechanics, not human behaviour: whether real reviewers
-rubber-stamp (P5) is still untested, and the thresholds are unvalidated policy values for TE8.
+orders. A refused de-escalation stays in Fraud & Security for a second person; the drill does not simulate that person.
+"Listed for review" means a wrong de-escalation is on a lookback or spot-check list, **not** that a second person has
+found and corrected it. Simulated reviewers test the control's mechanics, not human behaviour: whether real reviewers
+rubber-stamp (P5) is untested, and the thresholds are unvalidated policy values for TE8.
 
-**DGX status (live, 2 Nov 2026, commit `6c5db1b`, Windows client on NYU VPN, `llama-3.1-8b-instruct`, prompted-v1
-`5fcc685f`).** Run `20261102T145412Z`: live calls on the 5 proposals the V2 reference says to decline (canaries DEV-07257
-and DEV-06595, DEV-02570, disputed DEV-03714 and DEV-07139) plus the A7/TW7 smoke case DEV-02098 (1487055): 6/6 `ok`,
-10.8–19.8 s (median 14.1 s), 0 packet problems, and 6/6 the same route basis as the logged 13 October replies. Both canaries
-**qualify on the live model** (it still proposes Billing on them). The other 28 proposals come from the logged replies
-(`--live-ids`). Drill output is identical to the replay run `20261102T145633Z`: the rubber-stamper is suspended at item 5
-(failed DEV-06595), its next 29 de-escalation attempts are refused, and the lookback lists its 4 earlier de-escalations.
-The 2 canaries cover only the first 9–18 real proposals of a session (median 14 over 1,000 orders); after that only WATCH
-and its two-person rule protect the queue, which is why the pool must grow before production.
-Run `20261102T144936Z`, 5 minutes earlier, met an overloaded service (a 5-token request took 51 s): the first 2 calls hit
-the A7 45 s timeout and degraded to rule-only with no proposal; the run was stopped and `--timeout` / `--live-ids` added.
-No narrative text appears in either log (checked against the 81-case sample).
+**DGX status.** v1 evidence (control v1, commit `6c5db1b`): live run `20261102T145412Z`, stopped overload run
+`20261102T144936Z`, replay run `20261102T145633Z`, Open WebUI import `20261102T145412Z_a8_openwebui_import.json`.
+The v2 re-run is recorded in the evidence commit that follows this one.
 
-**Drop-in check on the team branch (not pushed there).** The three A8 files run unchanged inside
+**Drop-in check on the team branch (v1, at `021f070`; not pushed there).** The three A8 files ran unchanged inside
 `emycuadrosr/group1-abi-poc` `team/tw7-integrated` `e50cff3`, which carries an identical `src/a7_authority.py`:
 152 tests OK (1 skipped), drill output identical to this repo.
 
 **TE8 integration point (team app, not in this repo; not done).** The human step in `src/intake_app.py` records
 decisions on Emy's `authority_gate` dict, not on the A7 packet. TE8 must either build the reviewer packet with
-`a7_authority.decide` (already in the team branch) or add a short adapter, then route every reviewer decision through
-`ReviewerControl.record_decision(...)`, pass `full_text_shown=False` while the screen prints `narrative[:700]`, and serve
-proposals from `ReviewQueue`. Owner Mingyu, reviewer Yufei (P5 seeded-error test).
+`a7_authority.decide` (already in the team branch) or add a short adapter, show proposals through
+`ReviewerControl.view(...)`, route every reviewer decision through `ReviewerControl.record_decision(...)` with
+`full_text_shown=False` while the screen prints `narrative[:700]`, and serve proposals from `ReviewQueue`.
+Owner Mingyu, reviewer Yufei (P5 seeded-error test).
 
 ## Assignment 7 candidate: deterministic authority layer (`mingyu/a7-authority-layer`)
 

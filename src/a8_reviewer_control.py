@@ -1,9 +1,9 @@
 """Assignment 8 candidate: reviewer de-escalation control (Mingyu He). Not merged.
 
 Failure it targets (A8 worksheet)
-  Under the TW7 policy every case reaches a named reviewer, and on about 14% of in-scope cases the
-  fraud floor holds a case in Card Fraud & Security while the model proposes Billing (A7 replay:
-  34 of 81 sampled cases). A reviewer who accepts those proposals by habit ("rubber-stamping")
+  Under the TW7 policy every case reaches a named reviewer, and on about 14% of in-scope cases
+  (stratum-weighted; 34 of the 81 oversampled A7 replay cases, 42%) the fraud floor holds a case in
+  Card Fraud & Security while the model proposes Billing. A reviewer who accepts those proposals by habit ("rubber-stamping")
   moves genuine unauthorised-use cases out of Fraud & Security. The A7 controls (fixed reason code
   + attestation) prove that a person clicked, not that the person evaluated. On the A7 replay the
   model's proposal is wrong on 5 of 34 (3 Fraud & Security; 2 the audit could not decide because
@@ -21,15 +21,22 @@ What this module adds on top of src.a7_authority (it never weakens an A7 rule)
   C4 Resumption. Only a named supervisor (not the reviewer) can reinstate, and only after the
      lookback is closed and the reviewer has declined RECERT_CANARIES canaries since suspension.
   C5 Leading indicators -> WATCH, never suspension on their own: STREAK_WATCH accepted proposals
-     in a row, or a median decision time under MIN_DWELL_S. WATCH doubles the canary rate, sends the
-     supervisor the de-escalations since the last passed canary for a spot check, and, if no canary
-     is left to test the reviewer, refuses single-reviewer de-escalation (second reviewer needed).
-     Passing a canary clears WATCH.
-  C6 Preventive check. A de-escalation is refused unless the whole complaint was on screen (the
-     TW7 screen prints narrative[:700]; 27 of the 34 A7 proposals are longer).
-  C7 Feature stop. The model's proposals must not be shown (strict floor, A7: 41/74) when no
-     canary is qualified for the current model + prompt, when >= 2 reviewers are suspended, or when
-     >= 25% of canaries were failed (at least 4 seen).
+     in a row, or a median decision time under MIN_DWELL_S. WATCH doubles the canary rate and sends
+     the supervisor the de-escalations since the last passed canary for a spot check. Passing a
+     canary clears WATCH.
+  C6 Preventive check. A de-escalation is refused unless the caller states explicitly that the whole
+     complaint was on screen (full_text_shown=True; default refuses). The TW7 screen prints
+     narrative[:700]; 27 of the 34 A7 proposals are longer.
+  C7 Untested -> two people. When no canary is left to test a reviewer (pool used up for their
+     queue, or none qualified), ANY reviewer's de-escalation needs approved_by = a second named,
+     non-suspended person; a single-reviewer de-escalation is refused.
+  C8 Feature stop, enforced. When no canary is qualified for the current model + prompt, >= 2
+     reviewers are suspended, or >= 25% of canaries were failed (at least 4 seen): view() withholds
+     the model's proposal from the screen (strict floor, A7: 41/74) and record_decision() refuses
+     any single-reviewer de-escalation, until the owner resumes.
+
+A suspension is a precaution, not a verdict: one accepted canary shows one wrong de-escalation under
+the current reference label (DEV-06595's is single-labeller), not that the reviewer rubber-stamps.
 
 Every control event is appended to a JSONL audit log. No narrative text is written.
 
@@ -54,7 +61,7 @@ from src import a7_authority as a7
 from src import data_guard as g
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-CONTROL_VERSION = "a8-reviewer-control-v1"
+CONTROL_VERSION = "a8-reviewer-control-v2"
 BILLING, FRAUD = a7.BILLING, a7.FRAUD
 POOL_PATH = REPO_ROOT / "config" / "a8_canary_pool.json"
 A6_RUN = REPO_ROOT / "runs" / "20261013T122014Z_a6_prompted_eval.jsonl"
@@ -73,6 +80,10 @@ ACTIVE, WATCH, SUSPENDED = "active", "watch", "suspended"
 
 class ControlRefusal(a7.AuthorityError):
     """A decision the reviewer control does not allow. The case stays where it is."""
+
+    def __init__(self, msg, reason="refused"):
+        super().__init__(msg)
+        self.reason = reason
 
 
 def _now():
@@ -131,19 +142,19 @@ class ReviewQueue:
             for k in range(size):
                 if k == pos and self.canaries:
                     self.served_canaries += 1
-                    item = self.canaries.pop(0)
-                    if not self.canaries:
+                    yield self.canaries.pop(0), True
+                elif real_i < len(self.real):
+                    if not self.canaries and self.exhausted_after is None:
+                        # the last canary has been decided: from here no canary can test this reviewer
                         self.exhausted_after = real_i
                         self.control.set_supply(self.rid, False)
-                    yield item, True
-                elif real_i < len(self.real):
                     yield self.real[real_i], False
                     real_i += 1
                 if real_i >= len(self.real):
                     break
 
 
-# --------------------------------------------------------------------------- the control (C2-C7)
+# --------------------------------------------------------------------------- the control (C2-C8)
 class ReviewerControl:
     def __init__(self, canaries: dict, audit_path=None, every=CANARY_EVERY, clock=_now):
         self.canaries = dict(canaries)   # case_id -> spec (qualified for this model + prompt)
@@ -180,38 +191,61 @@ class ReviewerControl:
         c = self.canaries.get(packet["case_ref"]["case_id"])
         return c is not None and c["narrative_sha256"] == packet["case_ref"]["narrative_sha256"]
 
-    # ---- C2/C5/C6: every reviewer decision on a packet goes through here
+    # ---- C8: the proposal entry point. The screen asks before it shows a model proposal.
+    def view(self, packet, reviewer_id=None):
+        st_ = self.system_status()
+        show = packet.get("deescalation_proposal") is not None and st_["proposals_allowed"]
+        if packet.get("deescalation_proposal") is not None and not show:
+            self._event("proposal_withheld", reviewer_id, case_id=packet["case_ref"]["case_id"],
+                        stop_reasons=st_["stop_reasons"])
+        return {"packet": packet, "show_proposal": show,
+                "notice": None if show or packet.get("deescalation_proposal") is None else
+                "model proposal withheld (feature stop): strict fraud floor"}
+
+    def needs_two_people(self, rid):
+        """C7/C8: True when this reviewer's de-escalation cannot be tested by a canary."""
+        return (not self.supply.get(rid, bool(self.canaries))) or not self.system_status()["proposals_allowed"]
+
+    def _refuse(self, rid, cref, canary, reason, msg):
+        self._event("deescalation_refused", rid, case_id=cref, canary=canary, why=reason)
+        raise ControlRefusal(msg, reason)
+
+    # ---- C2/C5/C6/C7/C8: every reviewer decision on a packet goes through here
     def record_decision(self, packet, reviewer_id, final_queue, *, reason_code=None,
-                        attest=False, dwell_s=None, full_text_shown=True, note=""):
+                        attest=False, dwell_s=None, full_text_shown=None, approved_by=None,
+                        note=""):
         rid = str(reviewer_id or "").strip()
         s = self._st(rid)
         canary = self._is_canary(packet)
         proposal = packet.get("deescalation_proposal") is not None
         cref = packet["case_ref"]["case_id"]
         deesc = is_deescalation(packet, final_queue)
+        second = str(approved_by or "").strip() or None
 
         if deesc and s["status"] == SUSPENDED:
             if canary:
                 s["recert_passes"] = 0
-            self._event("deescalation_refused", rid, case_id=cref, canary=canary,
-                         why="reviewer de-escalation authority suspended")
-            raise ControlRefusal(f"de-escalation authority of {rid} is suspended: the case stays in "
-                                 f"{FRAUD} for a second reviewer")
-        if deesc and s["status"] == WATCH and not self.supply.get(rid, bool(self.canaries)):
-            self._event("deescalation_refused", rid, case_id=cref, canary=canary,
-                        why="reviewer on WATCH and no canary available: second reviewer needed")
-            raise ControlRefusal(f"{rid} is on WATCH and no canary is available to test the "
-                                 "decision: a second reviewer must make this de-escalation")
-        if deesc and not full_text_shown:
-            self._event("deescalation_refused", rid, case_id=cref, canary=canary,
-                        why="full complaint not shown")
-            raise ControlRefusal("de-escalation needs the whole complaint on screen "
-                                 f"(the TW7 screen shows the first {SCREEN_CHARS} characters)")
+            self._refuse(rid, cref, canary, "suspended",
+                         f"de-escalation authority of {rid} is suspended: the case stays in "
+                         f"{FRAUD} for a second reviewer")
+        if deesc and full_text_shown is not True:
+            self._refuse(rid, cref, canary, "full_text_not_confirmed",
+                         "de-escalation needs the caller to confirm the whole complaint was on screen "
+                         f"(full_text_shown=True; the TW7 screen shows the first {SCREEN_CHARS} characters)")
+        if deesc and self.needs_two_people(rid):
+            if second is None:
+                self._refuse(rid, cref, canary, "two_person_required",
+                             f"no canary can test {rid}'s decision (pool used up or feature stopped): "
+                             "a second named person must approve this de-escalation")
+            if second == rid or self._st(second)["status"] == SUSPENDED:
+                self._refuse(rid, cref, canary, "invalid_second_approver",
+                             "the second approver must be another named person with de-escalation authority")
+            self._event("two_person_deescalation", rid, case_id=cref, approved_by=second)
 
         record = a7.apply_employee_decision(packet, final_queue, rid, reason_code=reason_code,
                                             attest_customer_authorised=attest, note=note)
         record.update(control_version=CONTROL_VERSION, dwell_s=dwell_s, canary=canary,
-                      executed=False)
+                      second_approver=second if deesc else None, executed=False)
         if not proposal:
             return record
 
@@ -261,8 +295,7 @@ class ReviewerControl:
             s["status"], s["watch_reasons"] = WATCH, why
             s["spot_check"] = [d["case_id"] for d in s["deesc"][s["last_pass"]:]]
             self._event("reviewer_watch", rid, reasons=why, canary_block=WATCH_EVERY,
-                        spot_check=s["spot_check"], notify="fraud-operations supervisor",
-                        if_no_canary="single-reviewer de-escalation refused until a canary is passed")
+                        spot_check=s["spot_check"], notify="fraud-operations supervisor")
 
     def _suspend(self, rid, canary_case):
         s = self._st(rid)
@@ -303,7 +336,7 @@ class ReviewerControl:
         return self._event("reviewer_reinstated", rid, supervisor_id=supervisor_id,
                            evidence={"recert_passes": s["recert_passes"], "lookback_closed": True})
 
-    # ---- C7
+    # ---- C8
     def system_status(self):
         seen = sum(s["canaries_seen"] for s in self.r.values())
         failed = sum(s["canaries_failed"] for s in self.r.values())
@@ -317,7 +350,8 @@ class ReviewerControl:
             why.append(f"{failed}/{seen} canaries failed")
         return {"proposals_allowed": not why, "stop_reasons": why, "suspended": suspended,
                 "canaries_seen": seen, "canaries_failed": failed,
-                "if_stopped": "do not show model proposals; strict fraud floor until the owner resumes"}
+                "if_stopped": "view() withholds model proposals and single-reviewer de-escalation is "
+                              "refused (strict fraud floor) until the owner resumes"}
 
     def summary(self, rid):
         s = self._st(rid)
@@ -340,7 +374,8 @@ def detection_math(p_decline=5 / 34, every=CANARY_EVERY, alpha=0.05):
                         "detects_partial_rubber_stamping": False},
         "canary_rule": {"canary_every": every, "expected_real_proposals_before_first_canary": real_before,
                         "expected_wrong_deescalations_before_flag": round(real_before * p_decline, 2),
-                        "false_alarm": "none by construction: an accepted canary IS a wrong de-escalation",
+                        "false_alarm": "an accepted canary is a wrong de-escalation under the current reference "
+                                       "label; it shows one error, not a habit, so suspension is a precaution",
                         "added_review_load_per_100_cases": round(100 * 0.142 / (every - 1), 2)}}
 
 
@@ -381,8 +416,8 @@ def run_session(real, canaries, refs, policy, rid, seed, control_on=True, audit_
                           audit_path=audit_path)
     q = ReviewQueue(order, pool if control_on else [], ctl, rid, rng)
     out = {"reviewer": policy, "control": control_on, "seed": seed, "items": 0, "real_deesc": [],
-           "wrong_real_deesc": [], "refused": [], "canaries": [], "suspended_at_item": None,
-           "watch_at_item": None}
+           "wrong_real_deesc": [], "refused": [], "refused_reasons": Counter(), "canaries": [],
+           "suspended_at_item": None, "watch_at_item": None}
     for pk, is_canary in q:
         out["items"] += 1
         cid = pk["case_ref"]["case_id"]
@@ -391,12 +426,14 @@ def run_session(real, canaries, refs, policy, rid, seed, control_on=True, audit_
         attempted = fq == BILLING
         try:
             if control_on:
-                ctl.record_decision(pk, rid, fq, reason_code=code, attest=attest, dwell_s=dwell)
+                ctl.record_decision(pk, rid, fq, reason_code=code, attest=attest, dwell_s=dwell,
+                                    full_text_shown=True)
             else:                                   # TW7/A7 as built: reason code + attestation only
                 a7.apply_employee_decision(pk, fq, rid, reason_code=code, attest_customer_authorised=attest)
-        except ControlRefusal:
+        except ControlRefusal as exc:
             out["refused"].append(cid)
-            fq = FRAUD
+            out["refused_reasons"][exc.reason] += 1
+            fq = FRAUD                              # stays in Fraud & Security for a second person
         if is_canary:
             out["canaries"].append({"case_id": cid, "outcome": "failed" if fq == BILLING else
                                     "refused_attempt" if attempted else "passed"})
@@ -413,6 +450,7 @@ def run_session(real, canaries, refs, policy, rid, seed, control_on=True, audit_
     out["wrong_not_in_lookback"] = sorted(set(out["wrong_real_deesc"]) - set(out["lookback"])
                                           - set(out["spot_check"]))
     out["pool_exhausted_after_real"] = q.exhausted_after
+    out["refused_reasons"] = dict(out["refused_reasons"])
     out["status"] = ctl.status(rid)
     out["system"] = ctl.system_status()
     return out
@@ -529,7 +567,9 @@ def drill(packets, refs, rec_ids, seeds=1000, show_seed=8, log_path=None):
             "wrong_real_deesc_mean_control_off": round(st.mean(len(r["wrong_real_deesc"]) for r in off), 2),
             "wrong_real_deesc_mean_control_on": round(st.mean(len(r["wrong_real_deesc"]) for r in runs), 2),
             "refused_mean": round(st.mean(len(r["refused"]) for r in runs), 2),
-            "wrong_deesc_after_control_total": sum(len(r["wrong_not_in_lookback"]) for r in runs),
+            "refused_mean_by_reason": {k: round(sum(r["refused_reasons"].get(k, 0) for r in runs) / seeds, 2)
+                                       for k in ("suspended", "two_person_required")},
+            "wrong_deesc_not_listed_for_review_total": sum(len(r["wrong_not_in_lookback"]) for r in runs),
             "watch_sessions": sum(1 for r in runs if r["watch_at_item"]),
             "watch_before_suspension": sum(1 for r in runs if r["watch_at_item"]
                                            and (not r["suspended_at_item"] or r["watch_at_item"] < r["suspended_at_item"])),
@@ -551,11 +591,11 @@ def _print(res):
     print(f"\nSessions (seed {res['session_seed']}):")
     for k, o in res["sessions"].items():
         print(f"  {k:30s} items={o['items']:2d} real_deesc={len(o['real_deesc']):2d} "
-              f"wrong={o['wrong_real_deesc']} refused={len(o['refused'])} "
+              f"wrong={o['wrong_real_deesc']} refused={len(o['refused'])} {o['refused_reasons'] or ''} "
               f"suspended_at={o['suspended_at_item']} watch_at={o['watch_at_item']} "
               f"canaries={[(c['case_id'], c['outcome']) for c in o['canaries']]} "
               f"lookback={o['lookback']} spot_check={o['spot_check']} "
-              f"wrong_not_caught={o['wrong_not_in_lookback']} "
+              f"wrong_not_listed_for_review={o['wrong_not_in_lookback']} "
               f"pool_exhausted_after_real={o['pool_exhausted_after_real']}")
     print(f"\nRandom queue orders:")
     for k, v in res["random_orders"].items():

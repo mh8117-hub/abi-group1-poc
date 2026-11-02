@@ -1,0 +1,40 @@
+{
+ "version": "a8-canary-pool-v1",
+ "purpose": "Known-answer de-escalation proposals for the A8 reviewer control. A canary is used only when the current model proposes Billing on it (qualify()). Development data only; held-out never read.",
+ "selection_rule": "Reference Card Fraud & Security AND the logged prompted-v1 reply proposed de-escalation (A7 replay of run 20261013T122014Z) AND the narrative states unauthorised use without ambiguity. Cases with mixed authorised and unauthorised charges are not canaries: accepting them is not unambiguously wrong.",
+ "canaries": [
+  {
+   "case_id": "2121887",
+   "course_record_id": "DEV-07257",
+   "stratum": "A_fraudtext_billing_owner",
+   "narrative_sha256": "d41cb28f3250e72f491a723c02f05576a7a421dbae87fe8a91283e0344f3b8ec",
+   "narrative_chars": 3166,
+   "reference_queue": "Card Fraud & Security",
+   "reference_source": "team P3 adjudication, two labellers agreed (private team repo, team/tw5-data-pipeline e7eb32d)",
+   "evidence_quote": "another charge to my card that was not mine",
+   "evidence_char_offset": 900,
+   "visible_on_tw7_screen": false,
+   "why_unambiguous": "States a charge on the card that was not the customer's; the rest of the narrative is about unposted payments, which is what the model summarised."
+  },
+  {
+   "case_id": "1610290",
+   "course_record_id": "DEV-06595",
+   "stratum": "B_fraudtext_fraud_owner",
+   "narrative_sha256": "3fe124b4caacadc74a04c6e70d32170ecc34f65a380f68f26124b8c487a6bd50",
+   "narrative_chars": 2308,
+   "reference_queue": "Card Fraud & Security",
+   "reference_source": "A6 blind audit, one labeller (data/a6_audit_labels.csv)",
+   "evidence_quote": "a credit card that had been opened while I was out of the country",
+   "evidence_char_offset": 183,
+   "visible_on_tw7_screen": true,
+   "why_unambiguous": "Account opened in the customer's name while abroad, reported as a fraudulent account: identity misuse, not a billing dispute."
+  }
+ ],
+ "not_used_as_canary": [
+  {
+   "course_record_id": "DEV-02570",
+   "why": "first purchase authorised, later charges not: mixed, so accepting the proposal is not unambiguously wrong. Kept as a REAL proposal in the drill (reference Card Fraud & Security, A6 audit)."
+  }
+ ],
+ "production_gap": "Two canaries are recognisable after a few uses. Production needs a rotated pool of adjudicated closed cases, re-qualified on every model or prompt change."
+}

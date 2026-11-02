@@ -1,4 +1,47 @@
-# ABI Group 1 — Complaint Intake PoC: candidate contributions (A4 baseline, A5 data guard, A6 evaluation harness, A7 authority layer)
+# ABI Group 1 — Complaint Intake PoC: candidate contributions (A4 baseline, A5 data guard, A6 evaluation harness, A7 authority layer, A8 reviewer control)
+
+## Assignment 8 candidate: reviewer de-escalation control (`mingyu/a8-reviewer-control`)
+
+Candidate contribution by Mingyu He for Team Exercise 8 (controlled prototype). **Not merged.** Built on
+`mingyu/a7-authority-layer`; it wraps `a7_authority.apply_employee_decision` and never weakens an A7 rule.
+It contains no team code: the TE8 integration point in the team app is one call (below).
+
+**Failure it targets.** Under the TW7 policy every case reaches a named reviewer. On about 14% of in-scope
+cases the fraud floor holds a case in Card Fraud & Security while the model proposes Billing (A7 replay:
+34 of 81). A reviewer who accepts those proposals by habit moves genuine unauthorised-use cases out of Fraud &
+Security, and the audit record still looks clean: a named reviewer, a valid reason code, an attestation. On the
+A7 replay the proposal is wrong on 5 of 34 (3 Fraud & Security, 2 disputed taxonomy that the floor keeps).
+On the TW7 screen (`narrative[:700]`), 27 of the 34 proposals are cut off; in DEV-07257 the only statement of
+unauthorised use starts at character 900.
+
+| Control | In code |
+|---|---|
+| C1 Canaries | Adjudicated Fraud & Security cases on which the **live** model proposes Billing (`qualify`) are mixed into each reviewer's proposals, one per block of 10 (`ReviewQueue`). Nothing in the packet marks a canary. Pool: `config/a8_canary_pool.json` (2 cases). |
+| C2 Suspension | Accepting a canary suspends that reviewer's de-escalation authority at once; later de-escalations are refused (`ControlRefusal`) and the case stays in Fraud & Security. Declining is always allowed. |
+| C3 Lookback | Real de-escalations since the reviewer's last passed canary are listed for a second person. |
+| C4 Resumption | `reinstate` needs a named supervisor (not the reviewer), a closed lookback and 2 canaries declined since suspension. |
+| C5 WATCH | 19 accepted proposals in a row, or median decision time < 30 s: canary rate doubled, spot-check list to the supervisor, and if no canary is left, single-reviewer de-escalation is refused. |
+| C6 Full text | De-escalation refused unless the whole complaint was on screen. |
+| C7 Feature stop | `system_status`: proposals must not be shown when no canary qualifies for the current model + prompt, 2 reviewers are suspended, or >= 25% of canaries failed (>= 4 seen). |
+
+```bash
+git checkout mingyu/a8-reviewer-control
+python -m unittest discover -s tests -v                       # 92 offline tests (69 A4–A7 + 23 A8)
+python -m src.a8_reviewer_control math                        # canary vs acceptance-streak arithmetic
+python -m src.a8_reviewer_control drill --adjudicated data/adjudication/p3_adjudicated_labels.csv data/a6_audit_labels.csv
+python -m src.a8_reviewer_control drill --live --adjudicated ...   # DGX: 34 live calls, NYU network + .env token
+```
+
+`drill` re-derives the 34 proposal cases from the logged A6 replies, (live mode) calls the model on each,
+qualifies the canaries, and runs three **simulated** reviewers (careful, rubber-stamp, late-onset rubber-stamp)
+through the same queue with the control off (A7/TW7 as built) and on, for one printed seed and 1,000 random
+orders. Simulated reviewers test the control's mechanics, not human behaviour: whether real reviewers
+rubber-stamp (P5) is still untested, and the thresholds are unvalidated policy values for TE8.
+
+**TE8 integration point (team app, not in this repo).** In `src/intake_app.py`, route the human step through
+`ReviewerControl.record_decision(packet, reviewer, final_queue, ...)` (or call it beside
+`authority_gate.apply_override`), pass `full_text_shown=False` while the screen prints `narrative[:700]`, and
+serve proposals from `ReviewQueue`. Owner Mingyu, reviewer Yufei (P5 seeded-error test).
 
 ## Assignment 7 candidate: deterministic authority layer (`mingyu/a7-authority-layer`)
 

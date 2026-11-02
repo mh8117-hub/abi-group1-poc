@@ -38,10 +38,15 @@ through the same queue with the control off (A7/TW7 as built) and on, for one pr
 orders. Simulated reviewers test the control's mechanics, not human behaviour: whether real reviewers
 rubber-stamp (P5) is still untested, and the thresholds are unvalidated policy values for TE8.
 
-**TE8 integration point (team app, not in this repo).** In `src/intake_app.py`, route the human step through
-`ReviewerControl.record_decision(packet, reviewer, final_queue, ...)` (or call it beside
-`authority_gate.apply_override`), pass `full_text_shown=False` while the screen prints `narrative[:700]`, and
-serve proposals from `ReviewQueue`. Owner Mingyu, reviewer Yufei (P5 seeded-error test).
+**Drop-in check on the team branch (not pushed there).** The three A8 files run unchanged inside
+`emycuadrosr/group1-abi-poc` `team/tw7-integrated` `e50cff3`, which carries an identical `src/a7_authority.py`:
+152 tests OK (1 skipped), drill output identical to this repo.
+
+**TE8 integration point (team app, not in this repo; not done).** The human step in `src/intake_app.py` records
+decisions on Emy's `authority_gate` dict, not on the A7 packet. TE8 must either build the reviewer packet with
+`a7_authority.decide` (already in the team branch) or add a short adapter, then route every reviewer decision through
+`ReviewerControl.record_decision(...)`, pass `full_text_shown=False` while the screen prints `narrative[:700]`, and serve
+proposals from `ReviewQueue`. Owner Mingyu, reviewer Yufei (P5 seeded-error test).
 
 ## Assignment 7 candidate: deterministic authority layer (`mingyu/a7-authority-layer`)
 

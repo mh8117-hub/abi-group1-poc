@@ -29,7 +29,8 @@ git checkout mingyu/a8-reviewer-control
 python -m unittest discover -s tests -v                       # 92 offline tests (69 A4–A7 + 23 A8)
 python -m src.a8_reviewer_control math                        # canary vs acceptance-streak arithmetic
 python -m src.a8_reviewer_control drill --adjudicated data/adjudication/p3_adjudicated_labels.csv data/a6_audit_labels.csv
-python -m src.a8_reviewer_control drill --live --adjudicated ...   # DGX: 34 live calls, NYU network + .env token
+python -m src.a8_reviewer_control drill --live --timeout 180 --live-ids DEV-07257 DEV-06595 DEV-02570 DEV-03714 DEV-07139 DEV-02098 \
+       --adjudicated ...                                      # DGX: NYU network + .env token (omit --live-ids for all 34)
 ```
 
 `drill` re-derives the 34 proposal cases from the logged A6 replies, (live mode) calls the model on each,
@@ -37,6 +38,17 @@ qualifies the canaries, and runs three **simulated** reviewers (careful, rubber-
 through the same queue with the control off (A7/TW7 as built) and on, for one printed seed and 1,000 random
 orders. Simulated reviewers test the control's mechanics, not human behaviour: whether real reviewers
 rubber-stamp (P5) is still untested, and the thresholds are unvalidated policy values for TE8.
+
+**DGX status (live, 2 Nov 2026, commit `6c5db1b`, Windows client on NYU VPN, `llama-3.1-8b-instruct`, prompted-v1
+`5fcc685f`).** Run `20261102T145412Z`: live calls on the 5 proposals the V2 reference says to decline (canaries DEV-07257
+and DEV-06595, DEV-02570, disputed DEV-03714 and DEV-07139) plus the A7/TW7 smoke case DEV-02098 (1487055): 6/6 `ok`,
+10.8–19.8 s (median 14.1 s), 0 packet problems, and 6/6 the same route basis as the logged 13 October replies. Both canaries
+**qualify on the live model** (it still proposes Billing on them). The other 28 proposals come from the logged replies
+(`--live-ids`). Drill output is identical to the replay run `20261102T145633Z`: the rubber-stamper is suspended at item 5
+(failed DEV-06595), its next 29 de-escalation attempts are refused, and the lookback lists its 4 earlier de-escalations.
+Run `20261102T144936Z`, 5 minutes earlier, met an overloaded service (a 5-token request took 51 s): the first 2 calls hit
+the A7 45 s timeout and degraded to rule-only with no proposal; the run was stopped and `--timeout` / `--live-ids` added.
+No narrative text appears in either log (checked against the 81-case sample).
 
 **Drop-in check on the team branch (not pushed there).** The three A8 files run unchanged inside
 `emycuadrosr/group1-abi-poc` `team/tw7-integrated` `e50cff3`, which carries an identical `src/a7_authority.py`:

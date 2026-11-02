@@ -1,0 +1,3 @@
+[1/34] 1320684 mode=degraded latency=None basis=rule_only_degraded
+[2/34] 1324011 mode=degraded latency=None basis=rule_only_degraded
+[3/34] 1464660 mode=degraded latency=None basis=rule_only_degraded

@@ -452,19 +452,23 @@ def replay_packets(run=A6_RUN):
     return out
 
 
-def live_packets(case_ids, log_path):
+def live_packets(case_ids, log_path, timeout=None):
     """DGX: one live call per case through a7.run_case (timeout, degradation, boundary unchanged)."""
     from src.config import load_config
     from src.a6_eval import git_state
     from src.a6_prompts import prompt_sha256
     cfg = load_config()
+    if timeout:
+        cfg["A7_MODEL_TIMEOUT_S"] = str(timeout)
     rows = _narratives()
     a7.append_audit(log_path, {"type": "meta", "control_version": CONTROL_VERSION,
                                "git_commit": git_state(), "endpoint": cfg["OPENWEBUI_BASE_URL"],
                                "model_requested": cfg["MODEL_ID"], "temperature": cfg["TEMPERATURE"],
                                "seed": cfg["SEED"], "prompt_version": "prompted-v1",
                                "prompt_sha256": prompt_sha256("prompted-v1"),
-                               "layer_version": a7.LAYER_VERSION, "started_utc": _now()})
+                               "layer_version": a7.LAYER_VERSION,
+                               "model_timeout_s": float(cfg.get("A7_MODEL_TIMEOUT_S", a7.DEFAULT_MODEL_TIMEOUT_S)),
+                               "started_utc": _now()})
     out = {}
     for i, cid in enumerate(case_ids, 1):
         payload = g.build_model_input(rows[cid])
@@ -533,7 +537,10 @@ def drill(packets, refs, rec_ids, seeds=1000, show_seed=8, log_path=None):
 
 
 def _print(res):
-    print(f"{CONTROL_VERSION} drill")
+    print(f"{CONTROL_VERSION} drill ({res.get('mode', '?')})")
+    for x in res.get("live_cases", []):
+        print(f"  live {x['course_record_id']} ({x['case_id']}): mode={x['mode']} basis={x['route_basis']} "
+              f"latency={x['latency_s']} same_as_logged={x['same_route_basis_as_logged']} {x['errors'] or ''}")
     for q in res["qualification"]:
         print(f"  canary {q['course_record_id']} ({q['case_id']}): qualified={q['qualified']} "
               f"basis={q['route_basis']} model={q['model_id']}")
@@ -560,6 +567,11 @@ def main(argv=None):
     sub.add_parser("math", help="detection arithmetic: canary vs acceptance-streak rule")
     d = sub.add_parser("drill", help="canary qualification + simulated reviewers through the control")
     d.add_argument("--live", action="store_true", help="DGX: live calls (NYU network + .env token)")
+    d.add_argument("--live-ids", nargs="*", default=None,
+                   help="with --live: call the model only on these cases (DEV-ids or case_ids); the "
+                        "other proposals come from the logged replies. Default: all 34")
+    d.add_argument("--timeout", type=float, default=a7.DEFAULT_MODEL_TIMEOUT_S,
+                   help="per-call model timeout in seconds for --live (A7 default 45)")
     d.add_argument("--run", default=str(A6_RUN), help="logged DGX replies for replay mode")
     d.add_argument("--adjudicated", nargs="*", default=[],
                    help="team P3 labels first, then data/a6_audit_labels.csv (V2 reference)")
@@ -575,9 +587,15 @@ def main(argv=None):
     replayed = replay_packets(Path(a.run))
     ids = sorted(cid for cid, p in replayed.items() if p["deescalation_proposal"] is not None)
     if a.live:
-        packets = live_packets(ids, log)
-        drift = sorted(rec_ids[c] for c in ids if packets[c]["route_basis"] != replayed[c]["route_basis"])
-        print(f"live vs logged route_basis differs on {len(drift)}/{len(ids)}: {drift}")
+        by_rec = {v: k for k, v in rec_ids.items()}
+        want = ids if a.live_ids is None else [by_rec.get(x, x) for x in a.live_ids]
+        unknown = [x for x in want if x not in ids]
+        if unknown:
+            raise SystemExit(f"--live-ids not among the 34 proposal cases: {unknown}")
+        live = live_packets(want, log, a.timeout)
+        packets = {c: live.get(c, replayed[c]) for c in ids}
+        drift = sorted(rec_ids[c] for c in want if live[c]["route_basis"] != replayed[c]["route_basis"])
+        print(f"live vs logged route_basis differs on {len(drift)}/{len(want)}: {drift}")
     else:
         packets = {c: replayed[c] for c in ids}
         from src.a6_eval import git_state
@@ -587,11 +605,18 @@ def main(argv=None):
     res = drill(packets, refs, rec_ids, a.seeds, a.seed, log_path=log)
     res["mode"] = "live" if a.live else "replay"
     if a.live:
+        res["model_timeout_s"] = a.timeout
+        res["live_cases"] = [{"course_record_id": rec_ids[c], "case_id": c, "mode": live[c]["mode"],
+                              "route_basis": live[c]["route_basis"], "latency_s": live[c]["model"]["latency_s"],
+                              "errors": live[c]["model"]["errors"],
+                              "same_route_basis_as_logged": live[c]["route_basis"] == replayed[c]["route_basis"]}
+                             for c in want]
+        res["replayed_cases"] = len(ids) - len(want)
         res["live_vs_logged_route_basis_differs"] = drift
-        lat = sorted(p["model"]["latency_s"] for p in packets.values() if p["model"]["latency_s"])
+        lat = sorted(live[c]["model"]["latency_s"] for c in want if live[c]["model"]["latency_s"])
         res["live_latency_s"] = {"n": len(lat), "median": st.median(lat) if lat else None,
                                  "max": lat[-1] if lat else None,
-                                 "degraded": sum(p["mode"] == "degraded" for p in packets.values())}
+                                 "degraded": sum(live[c]["mode"] == "degraded" for c in want)}
     a7.append_audit(log, dict(res, type="summary"))
     _print(res)
     print("wrote", log)

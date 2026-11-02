@@ -44,9 +44,23 @@ orders. A refused de-escalation stays in Fraud & Security for a second person; t
 found and corrected it. Simulated reviewers test the control's mechanics, not human behaviour: whether real reviewers
 rubber-stamp (P5) is untested, and the thresholds are unvalidated policy values for TE8.
 
-**DGX status.** v1 evidence (control v1, commit `6c5db1b`): live run `20261102T145412Z`, stopped overload run
-`20261102T144936Z`, replay run `20261102T145633Z`, Open WebUI import `20261102T145412Z_a8_openwebui_import.json`.
-The v2 re-run is recorded in the evidence commit that follows this one.
+**DGX status.**
+- *Live, control v1* (commit `6c5db1b`, 2 Nov 14:54Z, Windows client on NYU VPN, `llama-3.1-8b-instruct`, prompted-v1
+  `5fcc685f`): run `20261102T145412Z` called the model on the 5 proposals the V2 reference says to decline (canaries
+  DEV-07257 and DEV-06595, DEV-02570, the two undecidable cases DEV-03714 and DEV-07139) plus the A7/TW7 smoke case
+  DEV-02098 (1487055): 6/6 `ok`, 10.8–19.8 s (median 14.1 s), 0 packet problems, 6/6 the same route basis as the
+  logged 13 October replies. Both canaries **qualify on the live model**. Open WebUI import:
+  `runs/20261102T145412Z_a8_openwebui_import.json`. Run `20261102T144936Z`, 5 minutes earlier, met an overloaded
+  service (a 5-token request took 51 s): 2/2 calls hit the A7 45 s timeout and degraded with no proposal; stopped.
+- *Control v2* changes no model call. It was re-run on the 6 packets logged live in `20261102T145412Z`
+  (run `20261102T201508Z`, `--packets-from`, 0 validation problems) and on the logged A6 replies (run
+  `20261102T201024Z`); both give the same output. A fresh live call with v2 was not possible on the afternoon of
+  2 November: the client was off the NYU VPN (TCP to the DGX failed).
+- *v2 drill, 1,000 random orders:* careful reviewer 0 wrong, never suspended, but once the 2-canary pool is used up
+  16.65 of its 29 correct de-escalations per session wait for a second person; rubber-stamper suspended in 1,000/1,000
+  orders (median item 5), 0.39 wrong before suspension, all listed for lookback; late-onset rubber-stamper 0.10 wrong
+  (v1: 0.37), all listed, suspended in 519/1,000, otherwise held by the two-person rule (10.0 per session).
+- No narrative text appears in any log (checked against the 81-case sample).
 
 **Drop-in check on the team branch (v1, at `021f070`; not pushed there).** The three A8 files ran unchanged inside
 `emycuadrosr/group1-abi-poc` `team/tw7-integrated` `e50cff3`, which carries an identical `src/a7_authority.py`:

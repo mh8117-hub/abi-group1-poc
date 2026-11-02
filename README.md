@@ -32,6 +32,7 @@ python -m src.a8_reviewer_control math                        # canary vs accept
 python -m src.a8_reviewer_control drill --adjudicated data/adjudication/p3_adjudicated_labels.csv data/a6_audit_labels.csv
 python -m src.a8_reviewer_control drill --live --timeout 180 --live-ids DEV-07257 DEV-06595 DEV-02570 DEV-03714 DEV-07139 DEV-02098 \
        --adjudicated ...                                      # DGX: NYU network + .env token (omit --live-ids for all 34)
+python -m src.a8_reviewer_control drill --packets-from runs/20261102T145412Z_a8_drill_live.jsonl --adjudicated ...  # v2 on logged live packets, no new calls
 python -m src.a8_reviewer_control export-openwebui runs/<run_id>_a8_drill_live.jsonl   # Open WebUI chat import
 ```
 

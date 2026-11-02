@@ -668,6 +668,9 @@ def main(argv=None):
     d.add_argument("--live-ids", nargs="*", default=None,
                    help="with --live: call the model only on these cases (DEV-ids or case_ids); the "
                         "other proposals come from the logged replies. Default: all 34")
+    d.add_argument("--packets-from", default=None,
+                   help="re-run the drill on the packets logged by an earlier LIVE drill run (no new model "
+                        "calls); the other proposals come from the logged A6 replies")
     d.add_argument("--timeout", type=float, default=a7.DEFAULT_MODEL_TIMEOUT_S,
                    help="per-call model timeout in seconds for --live (A7 default 45)")
     d.add_argument("--run", default=str(A6_RUN), help="logged DGX replies for replay mode")
@@ -688,7 +691,8 @@ def main(argv=None):
         return 0
     refs, rec_ids = _refs(a.adjudicated)
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    log = REPO_ROOT / "runs" / f"{run_id}_a8_drill_{'live' if a.live else 'replay'}.jsonl"
+    kind = "live" if a.live else "livepackets" if a.packets_from else "replay"
+    log = REPO_ROOT / "runs" / f"{run_id}_a8_drill_{kind}.jsonl"
     replayed = replay_packets(Path(a.run))
     ids = sorted(cid for cid, p in replayed.items() if p["deescalation_proposal"] is not None)
     if a.live:
@@ -701,6 +705,22 @@ def main(argv=None):
         packets = {c: live.get(c, replayed[c]) for c in ids}
         drift = sorted(rec_ids[c] for c in want if live[c]["route_basis"] != replayed[c]["route_basis"])
         print(f"live vs logged route_basis differs on {len(drift)}/{len(want)}: {drift}")
+    elif a.packets_from:
+        from src.a6_eval import git_state
+        src_recs = [json.loads(x) for x in Path(a.packets_from).read_text(encoding="utf-8").splitlines() if x.strip()]
+        logged = {r["case_ref"]["case_id"]: r for r in src_recs if r.get("type") == "packet"}
+        bad = {c: a7.validate_packet({k: v for k, v in p.items() if k not in ("type", "problems")})
+               for c, p in logged.items()}
+        bad = {c: v for c, v in bad.items() if v}
+        if bad:
+            raise SystemExit(f"logged packets fail validation: {bad}")
+        packets = {c: {k: v for k, v in logged[c].items() if k not in ("type", "problems")}
+                   if c in logged else replayed[c] for c in ids}
+        a7.append_audit(log, {"type": "meta", "control_version": CONTROL_VERSION, "mode": "livepackets",
+                              "git_commit": git_state(), "packets_from": Path(a.packets_from).name,
+                              "live_packets": len(logged), "run": Path(a.run).name, "started_utc": _now()})
+        print(f"re-using {len(logged)} logged live packets from {Path(a.packets_from).name} "
+              f"(0 validation problems); {len(ids) - len(logged)} from the logged A6 replies")
     else:
         packets = {c: replayed[c] for c in ids}
         from src.a6_eval import git_state
@@ -708,7 +728,9 @@ def main(argv=None):
                               "git_commit": git_state(), "run": Path(a.run).name,
                               "started_utc": _now()})
     res = drill(packets, refs, rec_ids, a.seeds, a.seed, log_path=log)
-    res["mode"] = "live" if a.live else "replay"
+    res["mode"] = kind
+    if a.packets_from:
+        res["packets_from"] = Path(a.packets_from).name
     if a.live:
         res["model_timeout_s"] = a.timeout
         res["live_cases"] = [{"course_record_id": rec_ids[c], "case_id": c, "mode": live[c]["mode"],

@@ -1,0 +1,2 @@
+{"event": "suspend", "reviewer_id": "r_demo", "metrics": {"trigger": "T1_canary_miss", "canary_id": "CAN-01"}, "notify": "card-complaint operations supervisor", "control_version": "reviewer-vigilance-v2", "at": "2026-11-05T22:14:24.457+00:00"}
+{"event": "resume", "reviewer_id": "r_demo", "owner": "supervisor", "root_cause": "accepted without reading", "canary_passes": 2, "control_version": "reviewer-vigilance-v2", "at": "2026-11-05T22:14:24.755+00:00"}

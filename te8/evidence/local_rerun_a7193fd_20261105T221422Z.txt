@@ -1,0 +1,74 @@
+LOCAL re-run, NOT DGX. Cloud workspace (Claude, for Mingyu He), 5 Nov 2026, on a scratch copy of
+emycuadrosr/group1-abi-poc team/tw8-controlled at a7193fd (team repo read only; nothing pushed there).
+Python 3.13.18 here vs 3.12.3 on the DGX: this does not replace the DGX re-run (te8/dgx_rerun_tw8.sh).
+Command: PY=python3 bash te8/dgx_rerun_tw8.sh te8   (run from the team-branch copy root)
+--------------------------------------------------------------------------------
+TE8 DGX re-run of team/tw8-controlled (consolidation, already-defined run)
+host=vm user=root utc=2026-11-05T22:14:22Z python=Python 3.13.18
+commit=a7193fd
+== sha256 of control files (a7193fd locally: reviewer_vigilance b2796cb0..., intake_app 28528165...)
+28528165c20b799ded1192e5ceaab7c73160f9181508f75502934eba1718793d  src/intake_app.py
+b2796cb088eaebda621d52927378b9609c4ce990c9d2d145d5666b6f2891782b  src/reviewer_vigilance.py
+59d0e1573982c14c2beaa771ebd7c7791edfb02b2983b22240c0df86814ebde2  candidates/yufei/a8/durable_audit.py
+c3d2b703d05b96aaa58a8610e4a7820dbefc06837b3be2dd6956278de023f9bc  src/a8_reviewer_control.py
+099da664bc6eac21f67fde4d337c8422edbd94e3983129d522d51f156d85a407  data/a8_canary_cases.jsonl
+7d9ee544b6dac63a4c80a930798772c27a76b6ae1290e2835ed45b7c23413886  config/a8_canary_pool.json
+== tests
+-- decision path (expect 55 OK)
+Ran 55 tests in 0.205s
+
+OK
+-- Mingyu C1-C8 in the team suite (expect 29 OK; in branch, not called by the app)
+Ran 29 tests in 0.075s
+
+OK
+-- Yufei durable audit (expect 14 OK)
+Ran 14 tests in 0.023s
+
+OK
+-- TE8 interim two-person check (expect 10 OK)
+Ran 10 tests in 0.003s
+
+OK
+== team control scenario: tools/a8/run_a8_dgx.sh
+== scenario: rubber-stamp reviewer
+exit=0 :: --case-id 1487055 --backend replay --accept
+exit=0 :: --case-id 1502800 --backend replay --accept
+exit=0 :: --case-id 1451462 --backend replay --accept
+exit=5 :: --canary CAN-01 --accept
+exit=4 :: --case-id 2217258 --backend replay --accept
+RESUME REFUSED: resumption needs a named control owner who is not the suspended reviewer
+self-resume exit=2
+RESUME REFUSED: needs 2 passes on distinct canaries other than the one missed, since suspension (has 0)
+resume-before-practice exit=2
+exit=0 :: --canary CAN-02 --override Card Fraud & Security --reason practice
+exit=0 :: --canary CAN-03 --override Card Fraud & Security --reason practice
+RESUMED: r_demo by supervisor
+resume exit=0
+exit=0 :: --case-id 2217258 --backend replay --accept
+== TW8: de-escalation out of Fraud by override (Mingyu's canary case 2121887, evidence past char 700)
+exit=2 :: --case-id 2121887 --backend replay --override Card Billing Disputes --reason junk
+exit=0 :: --case-id 2121887 --backend replay --override Card Billing Disputes --reason customer_authorized_transaction
+== audit log (case, action, final_state, status_before)
+1487055 accept recorded_for_employee_queue active 
+1502800 accept recorded_for_employee_queue active 
+1451462 accept recorded_for_employee_queue active 
+1893839 accept canary_scored_not_routed active CANARY CAN-01
+2217258 blocked_reviewer_suspended manual_intake_supervisor suspended 
+2385762 override canary_scored_not_routed suspended CANARY CAN-02
+1089858 override canary_scored_not_routed suspended CANARY CAN-03
+2217258 accept recorded_for_employee_queue active 
+2121887 override recorded_for_employee_queue active 
+== control log
+{"event": "suspend", "reviewer_id": "r_demo", "metrics": {"trigger": "T1_canary_miss", "canary_id": "CAN-01"}, "notify": "card-complaint operations supervisor", "control_version": "reviewer-vigilance-v2", "at": "2026-11-05T22:14:24.457+00:00"}
+{"event": "resume", "reviewer_id": "r_demo", "owner": "supervisor", "root_cause": "accepted without reading", "canary_passes": 2, "control_version": "reviewer-vigilance-v2", "at": "2026-11-05T22:14:24.755+00:00"}
+== sha256
+b2796cb088eaebda621d52927378b9609c4ce990c9d2d145d5666b6f2891782b  src/reviewer_vigilance.py
+28528165c20b799ded1192e5ceaab7c73160f9181508f75502934eba1718793d  src/intake_app.py
+099da664bc6eac21f67fde4d337c8422edbd94e3983129d522d51f156d85a407  data/a8_canary_cases.jsonl
+37802e4db6b8ec26e5b99272db0c1e45326ae268b86ee2d3053d70fc2bd51c2e  tests/test_reviewer_vigilance.py
+== TE8 interim two-person check on runs/a8_dgx/20261105T221423Z/audit.jsonl (expect 1 BREACH, exit 1)
+de-escalations out of Card Fraud & Security: 1; without a second person: 1
+  case 2121887 reviewer r_deesc reason customer_authorized_transaction: BREACH -> lookback
+interim-check exit=1
+== live canary run: skipped (set LIVE_ENV to run it)

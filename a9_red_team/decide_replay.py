@@ -26,6 +26,9 @@ def main():
     ap.add_argument("--cases", default=str(HERE / "cases_frozen.jsonl"))
     ap.add_argument("--label", required=True)
     ap.add_argument("--out", default=str(HERE / "runs"))
+    ap.add_argument("--policy", choices=["review-all", "rule-triggers"], default="review-all",
+                    help="review-all = target default (the tested configuration); rule-triggers = the "
+                         "team's recorded dissent option, run only as a labelled policy diagnostic")
     a = ap.parse_args()
     head = subprocess.run(["git", "-C", a.target, "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
     dirty = subprocess.run(["git", "-C", a.target, "status", "--porcelain", "--untracked-files=no"],
@@ -52,12 +55,13 @@ def main():
         with contextlib.redirect_stdout(so), contextlib.redirect_stderr(se):
             try:
                 code = app.main(["--file", str(f), "--backend", "webui", "--reviewer", REVIEWER,
-                                 "--accept", "--log", str(audit)])
+                                 "--accept", "--log", str(audit)]
+                                + (["--rule-triggers"] if a.policy == "rule-triggers" else []))
             except SystemExit as exc:
                 code = exc.code
             except Exception as exc:  # a crash is a result, not a harness failure
                 code = f"CRASH {type(exc).__name__}: {exc}"
-        results.append({"test_id": r["test_id"], "label": a.label, "exit": code,
+        results.append({"test_id": r["test_id"], "label": a.label, "policy": a.policy, "exit": code,
                         "stdout_tail": so.getvalue()[-1500:], "stderr": se.getvalue()[-1500:]})
         print(r["test_id"], "exit", code, flush=True)
     # control log sits next to the audit log (intake_app rule); rename it per label
